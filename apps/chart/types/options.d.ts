@@ -252,9 +252,12 @@ export type PlotXPointType = number | string;
 
 export type PlotRangeType = RangeDataType<PlotXPointType>;
 
+type PlotOrientation = 'horizontal' | 'vertical';
+
 export type PlotLine = {
   value: PlotXPointType;
   color: string;
+  orientation?: PlotOrientation;
   opacity?: number;
   id?: string;
 };
@@ -262,6 +265,7 @@ export type PlotLine = {
 export type PlotBand = {
   range: PlotRangeType | PlotRangeType[];
   color: string;
+  orientation?: PlotOrientation;
   opacity?: number;
   mergeOverlappingRanges?: boolean;
   id?: string;

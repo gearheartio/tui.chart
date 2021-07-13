@@ -38,6 +38,7 @@ function getOverlappingRange(ranges: PlotBand[]) {
   return {
     range: overlappingRanges,
     color: ranges[0].color,
+    orientation: ranges[0].orientation,
   };
 }
 
@@ -58,25 +59,33 @@ function getValidValue(value: string | number, categories: string[], isDateType 
 }
 
 function makePlotLines(categories: string[], isDateType: boolean, plotLines: PlotLine[] = []) {
-  return plotLines.map(({ value, color, opacity }) => ({
-    value: getValidValue(value, categories, isDateType),
-    color: rgba(color, opacity),
-  }));
+  return plotLines.map(({ value, color, orientation, opacity }) => {
+    const isVertical = orientation === 'vertical';
+
+    return {
+      value: isVertical ? getValidValue(value, categories, isDateType) : value,
+      color: rgba(color, opacity),
+      orientation: orientation || 'vertical',
+    };
+  });
 }
 
 function makePlotBands(categories: string[], isDateType: boolean, plotBands: PlotBand[] = []) {
-  return plotBands.flatMap(({ range, mergeOverlappingRanges = false, color: bgColor, opacity }) => {
-    const color = rgba(bgColor, opacity);
-    const rangeArray = (isRangeValue(range[0]) ? range : [range]) as PlotRangeType[];
-    const ranges: PlotBand[] = rangeArray.map((rangeData) => ({
-      range: rangeData.map((value) =>
-        getValidValue(value, categories, isDateType)
-      ) as RangeDataType<number>,
-      color,
-    }));
+  return plotBands.flatMap(
+    ({ range, mergeOverlappingRanges = false, color: bgColor, opacity, orientation }) => {
+      const color = rgba(bgColor, opacity);
+      const rangeArray = (isRangeValue(range[0]) ? range : [range]) as PlotRangeType[];
+      const ranges: PlotBand[] = rangeArray.map((rangeData) => ({
+        range: rangeData.map((value) =>
+          getValidValue(value, categories, isDateType)
+        ) as RangeDataType<number>,
+        color,
+        orientation: orientation || 'vertical',
+      }));
 
-    return mergeOverlappingRanges ? getOverlappingRange(ranges) : ranges;
-  });
+      return mergeOverlappingRanges ? getOverlappingRange(ranges) : ranges;
+    }
+  );
 }
 
 const plot: StoreModule = {

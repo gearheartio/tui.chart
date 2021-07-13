@@ -171,3 +171,31 @@ export const categoryRanges = () => {
 
   return el;
 };
+
+export const horizontal = () => {
+  const { el } = createChart(randomData(24), {
+    plot: {
+      bands: [
+        {
+          range: [
+            [20, 50],
+            [30, 65],
+          ],
+          color: '#cccccc',
+          opacity: 0.2,
+          orientation: 'horizontal',
+          mergeOverlappingRanges: boolean('mergeOverlappingRanges', true),
+        },
+      ],
+      lines: [
+        {
+          value: 75,
+          color: '#fa2828',
+          orientation: 'horizontal',
+        },
+      ],
+    },
+  });
+
+  return el;
+};

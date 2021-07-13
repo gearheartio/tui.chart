@@ -56,6 +56,7 @@ describe('Plot Store', () => {
         {
           value: 3,
           color: 'rgba(255, 0, 0, 0.2)',
+          orientation: 'vertical',
         },
       ]);
     });
@@ -86,6 +87,7 @@ describe('Plot Store', () => {
         {
           range: [1, 3],
           color: 'rgba(255, 0, 0, 0.2)',
+          orientation: 'vertical',
         },
       ]);
     });
@@ -117,10 +119,12 @@ describe('Plot Store', () => {
         {
           range: [1, 3],
           color: 'rgba(255, 0, 0, 0.2)',
+          orientation: 'vertical',
         },
         {
           range: [2, 4],
           color: 'rgba(255, 0, 0, 0.2)',
+          orientation: 'vertical',
         },
       ]);
     });
@@ -153,6 +157,7 @@ describe('Plot Store', () => {
         {
           range: [1, 4],
           color: 'rgba(255, 0, 0, 0.2)',
+          orientation: 'vertical',
         },
       ]);
     });
@@ -186,6 +191,7 @@ describe('Plot Store', () => {
         {
           range: [0, 3],
           color: 'rgba(255, 0, 0, 0.2)',
+          orientation: 'vertical',
         },
       ]);
     });

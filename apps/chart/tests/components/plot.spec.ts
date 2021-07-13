@@ -246,6 +246,7 @@ describe('plot options', () => {
       yAxis: { x: 10, y: 10, width: 10, height: 80 },
       plot: { width: 80, height: 80, x: 10, y: 10 },
     },
+    scale: {},
     series: {
       line: {
         data: data,

@@ -1,6 +1,11 @@
 import Component from './component';
 import { ChartState, Options, Axes, ValueEdge, LabelAxisData, Scale } from '@t/store/store';
-import { crispPixel, makeTickPixelPositions, getXPosition } from '@src/helpers/calculator';
+import {
+  crispPixel,
+  makeTickPixelPositions,
+  getXPosition,
+  getYPosition,
+} from '@src/helpers/calculator';
 import Painter from '@src/painter';
 import { LineModel } from '@t/components/axis';
 import { PlotModels } from '@t/components/plot';
@@ -18,6 +23,15 @@ type XPositionParam = {
   startIndex: number;
 };
 
+type YPositionParam = {
+  axisData: LabelAxisData;
+  offsetSize: number;
+  value: number | string;
+  scale: Scale;
+};
+
+type PositionParam = { vertical: boolean } & XPositionParam & YPositionParam;
+
 function getValidIndex(index: number, startIndex = 0) {
   return ~~index ? index - startIndex : index;
 }
@@ -27,6 +41,23 @@ function validXPosition({ axisData, offsetSize, value, startIndex = 0 }: XPositi
   const x = getXPosition(axisData, offsetSize, value, dataIndex);
 
   return x > 0 ? Math.min(offsetSize, x) : 0;
+}
+
+function validYPosition({ axisData, offsetSize, value, scale }: YPositionParam) {
+  const y = getYPosition(axisData, offsetSize, value as number, scale);
+
+  return y > 0 ? Math.min(offsetSize, y) : 0;
+}
+
+function validPosition({ vertical, ...rest }: PositionParam) {
+  let position: number;
+  if (vertical) {
+    position = validXPosition(rest);
+  } else {
+    position = validYPosition(rest);
+  }
+
+  return position;
 }
 
 function getPlotAxisData(vertical: boolean, axes: Axes) {
@@ -50,43 +81,41 @@ export default class Plot extends Component {
     };
   }
 
-  renderLines(axes: Axes, categories: string[], lines: PlotLine[] = []): LineModel[] {
-    return lines.map(({ value, color }) => {
-      const { offsetSize } = this.getPlotAxisSize(true);
-      const position = validXPosition({
-        axisData: getPlotAxisData(true, axes) as LabelAxisData,
+  renderLines(axes: Axes, categories: string[], scale: Scale, lines: PlotLine[] = []): LineModel[] {
+    return lines.map(({ value, color, orientation }) => {
+      const vertical = !orientation || orientation === 'vertical';
+      const { offsetSize } = this.getPlotAxisSize(vertical);
+      const position = validPosition({
+        vertical,
+        axisData: getPlotAxisData(vertical, axes) as LabelAxisData,
         offsetSize,
         value,
         categories,
         startIndex: this.startIndex,
+        scale,
       });
 
-      return this.makeLineModel(true, position, { color });
+      return this.makeLineModel(vertical, position, { color });
     });
   }
 
-  renderBands(axes: Axes, categories: string[], bands: PlotBand[] = []): RectModel[] {
-    const { offsetSize, anchorSize } = this.getPlotAxisSize(true);
-
-    return bands.map(({ range, color }: PlotBand) => {
-      const [start, end] = (range as PlotRangeType).map((value) =>
-        validXPosition({
-          axisData: getPlotAxisData(true, axes) as LabelAxisData,
+  renderBands(axes: Axes, categories: string[], scale: Scale, bands: PlotBand[] = []): RectModel[] {
+    return bands.map(({ range, color, orientation }: PlotBand) => {
+      const vertical = !orientation || orientation === 'vertical';
+      const { offsetSize, anchorSize } = this.getPlotAxisSize(vertical);
+      const [start, end] = (range as PlotRangeType).map((value) => {
+        return validPosition({
+          vertical,
+          axisData: getPlotAxisData(vertical, axes) as LabelAxisData,
           offsetSize,
           value,
           categories,
           startIndex: this.startIndex,
-        })
-      );
+          scale,
+        });
+      });
 
-      return {
-        type: 'rect',
-        x: crispPixel(start),
-        y: crispPixel(0),
-        width: end - start,
-        height: anchorSize,
-        color,
-      };
+      return this.makeBandModel(vertical, start, end, anchorSize, color);
     });
   }
 
@@ -203,8 +232,8 @@ export default class Plot extends Component {
     const categories = (state.categories as string[]) ?? [];
     const { lines, bands, visible } = plot;
 
-    this.models.line = this.renderLines(axes, categories, lines);
-    this.models.band = this.renderBands(axes, categories, bands);
+    this.models.line = this.renderLines(axes, categories, scale, lines);
+    this.models.band = this.renderBands(axes, categories, scale, bands);
 
     if (visible) {
       this.models.plot = [this.renderPlotBackgroundRect(), ...this.renderPlots(axes, scale)];
@@ -237,6 +266,21 @@ export default class Plot extends Component {
       lineWidth,
       dashSegments,
     };
+  }
+
+  makeBandModel(
+    vertical: boolean,
+    start: number,
+    end: number,
+    anchorSize: number,
+    color: string
+  ): RectModel {
+    const x = vertical ? crispPixel(start) : crispPixel(0);
+    const y = vertical ? crispPixel(0) : crispPixel(start);
+    const width = vertical ? end - start : anchorSize;
+    const height = vertical ? anchorSize : end - start;
+
+    return { type: 'rect', x, y, width, height, color };
   }
 
   beforeDraw(painter: Painter) {

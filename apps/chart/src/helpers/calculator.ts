@@ -1,4 +1,4 @@
-import { ValueEdge, LabelAxisData } from '@t/store/store';
+import { ValueEdge, LabelAxisData, Scale } from '@t/store/store';
 import { range, isInteger, isString, isNumber, isNull } from '@src/helpers/utils';
 import { BezierPoint, Point } from '@t/options';
 import { DEFAULT_LABEL_TEXT } from '@src/brushes/label';
@@ -207,4 +207,25 @@ export function getXPosition(
   }
 
   return x;
+}
+
+export function getYPosition(
+  axisData: LabelAxisData,
+  offsetSize: number,
+  value: number,
+  scale: Scale
+) {
+  const { labelRange } = axisData;
+  let y: number;
+  const valueRatio = offsetSize / (scale.yAxis?.limit.max ?? 1);
+  const scaledValue = value * valueRatio;
+
+  if (labelRange) {
+    const yValueRatio = getValueRatio(scaledValue, labelRange);
+    y = offsetSize - yValueRatio * offsetSize;
+  } else {
+    y = offsetSize - scaledValue;
+  }
+
+  return y;
 }
