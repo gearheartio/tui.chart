@@ -54,7 +54,7 @@ export default class Plot extends Component {
         };
     }
     renderLines(axes, categories, scale, lines = []) {
-        return lines.map(({ value, color, orientation }) => {
+        return lines.map(({ value, color, orientation, dashSegments, width }) => {
             const vertical = !orientation || orientation === 'vertical';
             const { offsetSize } = this.getPlotAxisSize(vertical);
             const position = validPosition({
@@ -66,7 +66,7 @@ export default class Plot extends Component {
                 startIndex: this.startIndex,
                 scale,
             });
-            return this.makeLineModel(vertical, position, { color });
+            return this.makeLineModel(vertical, position, { color, dashSegments, lineWidth: width });
         });
     }
     renderBands(axes, categories, scale, bands = []) {

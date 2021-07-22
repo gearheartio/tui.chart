@@ -28,12 +28,14 @@ function getValidValue(value, categories, isDateType = false) {
     return value;
 }
 function makePlotLines(categories, isDateType, plotLines = []) {
-    return plotLines.map(({ value, color, orientation, opacity }) => {
+    return plotLines.map(({ value, color, orientation, opacity, dashSegments, width }) => {
         const isVertical = orientation === 'vertical';
         return {
             value: isVertical ? getValidValue(value, categories, isDateType) : value,
             color: rgba(color, opacity),
             orientation: orientation || 'vertical',
+            dashSegments,
+            width,
         };
     });
 }

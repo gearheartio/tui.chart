@@ -19110,12 +19110,16 @@ function makePlotLines(categories, isDateType) {
     var value = _ref4.value,
         color = _ref4.color,
         orientation = _ref4.orientation,
-        opacity = _ref4.opacity;
+        opacity = _ref4.opacity,
+        dashSegments = _ref4.dashSegments,
+        width = _ref4.width;
     var isVertical = orientation === 'vertical';
     return {
       value: isVertical ? getValidValue(value, categories, isDateType) : value,
       color: rgba(color, opacity),
-      orientation: orientation || 'vertical'
+      orientation: orientation || 'vertical',
+      dashSegments: dashSegments,
+      width: width
     };
   });
 }
@@ -20036,7 +20040,9 @@ var Plot = /*#__PURE__*/function (_Component) {
       return lines.map(function (_ref4) {
         var value = _ref4.value,
             color = _ref4.color,
-            orientation = _ref4.orientation;
+            orientation = _ref4.orientation,
+            dashSegments = _ref4.dashSegments,
+            width = _ref4.width;
         var vertical = !orientation || orientation === 'vertical';
 
         var _this2$getPlotAxisSiz = _this2.getPlotAxisSize(vertical),
@@ -20052,7 +20058,9 @@ var Plot = /*#__PURE__*/function (_Component) {
           scale: scale
         });
         return _this2.makeLineModel(vertical, position, {
-          color: color
+          color: color,
+          dashSegments: dashSegments,
+          lineWidth: width
         });
       });
     }
