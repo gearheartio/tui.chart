@@ -1,6 +1,6 @@
 {
   "name": "@tui-gearheart/chart",
-  "version": "4.3.5",
+  "version": "4.3.6",
   "description": "TOAST UI Application: Chart",
   "main": "dist/toastui-chart.js",
   "types": "types/index.d.ts",
@@ -92,7 +92,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gearheart.io/tui.chart.git"
+    "url": "git+https://github.com/gearheartio/tui.chart.git"
   },
   "author": "NHN. FE Development Lab <dl_javascript@nhn.com>",
   "license": "MIT",

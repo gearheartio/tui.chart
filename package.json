@@ -1,5 +1,6 @@
 {
-  "name": "root",
+  "name": "tui-gearheart",
+  "version": "4.3.6",
   "private": true,
   "devDependencies": {
     "@babel/core": "^7.10.1",
