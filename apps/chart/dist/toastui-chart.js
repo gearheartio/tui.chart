@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Chart 4th Edition
- * @version 4.3.5 | Wed Jul 14 2021
+ * @version 4.3.5 | Thu Jul 22 2021
  * @author NHN. FE Development Lab <dl_javascript@nhn.com>
  * @license MIT
  */
@@ -9342,12 +9342,15 @@ function getXPosition(axisData, offsetSize, value, dataIndex) {
   return x;
 }
 function getYPosition(axisData, offsetSize, value, scale) {
-  var _scale$yAxis$limit$ma, _scale$yAxis;
+  var _scale$yAxis$limit$mi, _scale$yAxis, _scale$yAxis$limit$ma, _scale$yAxis2;
 
+  var scaleMin = (_scale$yAxis$limit$mi = (_scale$yAxis = scale.yAxis) === null || _scale$yAxis === void 0 ? void 0 : _scale$yAxis.limit.min) !== null && _scale$yAxis$limit$mi !== void 0 ? _scale$yAxis$limit$mi : 0;
+  var scaleMax = (_scale$yAxis$limit$ma = (_scale$yAxis2 = scale.yAxis) === null || _scale$yAxis2 === void 0 ? void 0 : _scale$yAxis2.limit.max) !== null && _scale$yAxis$limit$ma !== void 0 ? _scale$yAxis$limit$ma : 1;
+  var scaleRange = scaleMax - scaleMin;
   var labelRange = axisData.labelRange;
   var y;
-  var valueRatio = offsetSize / ((_scale$yAxis$limit$ma = (_scale$yAxis = scale.yAxis) === null || _scale$yAxis === void 0 ? void 0 : _scale$yAxis.limit.max) !== null && _scale$yAxis$limit$ma !== void 0 ? _scale$yAxis$limit$ma : 1);
-  var scaledValue = value * valueRatio;
+  var valueRatio = offsetSize / scaleRange;
+  var scaledValue = (value - scaleMin) * valueRatio;
 
   if (labelRange) {
     var yValueRatio = getValueRatio(scaledValue, labelRange);

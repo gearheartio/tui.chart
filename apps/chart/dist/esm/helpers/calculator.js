@@ -152,11 +152,14 @@ export function getXPosition(axisData, offsetSize, value, dataIndex) {
     return x;
 }
 export function getYPosition(axisData, offsetSize, value, scale) {
-    var _a, _b;
+    var _a, _b, _c, _d;
+    const scaleMin = (_b = (_a = scale.yAxis) === null || _a === void 0 ? void 0 : _a.limit.min, (_b !== null && _b !== void 0 ? _b : 0));
+    const scaleMax = (_d = (_c = scale.yAxis) === null || _c === void 0 ? void 0 : _c.limit.max, (_d !== null && _d !== void 0 ? _d : 1));
+    const scaleRange = scaleMax - scaleMin;
     const { labelRange } = axisData;
     let y;
-    const valueRatio = offsetSize / (_b = (_a = scale.yAxis) === null || _a === void 0 ? void 0 : _a.limit.max, (_b !== null && _b !== void 0 ? _b : 1));
-    const scaledValue = value * valueRatio;
+    const valueRatio = offsetSize / scaleRange;
+    const scaledValue = (value - scaleMin) * valueRatio;
     if (labelRange) {
         const yValueRatio = getValueRatio(scaledValue, labelRange);
         y = offsetSize - yValueRatio * offsetSize;
