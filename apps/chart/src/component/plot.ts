@@ -82,7 +82,7 @@ export default class Plot extends Component {
   }
 
   renderLines(axes: Axes, categories: string[], scale: Scale, lines: PlotLine[] = []): LineModel[] {
-    return lines.map(({ value, color, orientation }) => {
+    return lines.map(({ value, color, orientation, dashSegments, width }) => {
       const vertical = !orientation || orientation === 'vertical';
       const { offsetSize } = this.getPlotAxisSize(vertical);
       const position = validPosition({
@@ -95,7 +95,7 @@ export default class Plot extends Component {
         scale,
       });
 
-      return this.makeLineModel(vertical, position, { color });
+      return this.makeLineModel(vertical, position, { color, dashSegments, lineWidth: width });
     });
   }
 

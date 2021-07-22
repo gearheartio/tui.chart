@@ -191,6 +191,8 @@ export const horizontal = () => {
         {
           value: 50,
           color: '#fa2828',
+          width: 2,
+          dashSegments: [10, 2],
           orientation: 'horizontal',
         },
       ],

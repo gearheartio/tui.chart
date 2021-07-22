@@ -59,13 +59,15 @@ function getValidValue(value: string | number, categories: string[], isDateType 
 }
 
 function makePlotLines(categories: string[], isDateType: boolean, plotLines: PlotLine[] = []) {
-  return plotLines.map(({ value, color, orientation, opacity }) => {
+  return plotLines.map(({ value, color, orientation, opacity, dashSegments, width }) => {
     const isVertical = orientation === 'vertical';
 
     return {
       value: isVertical ? getValidValue(value, categories, isDateType) : value,
       color: rgba(color, opacity),
       orientation: orientation || 'vertical',
+      dashSegments,
+      width,
     };
   });
 }
