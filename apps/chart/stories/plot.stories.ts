@@ -189,7 +189,7 @@ export const horizontal = () => {
       ],
       lines: [
         {
-          value: 75,
+          value: 50,
           color: '#fa2828',
           orientation: 'horizontal',
         },

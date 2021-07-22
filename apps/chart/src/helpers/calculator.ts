@@ -215,10 +215,13 @@ export function getYPosition(
   value: number,
   scale: Scale
 ) {
+  const scaleMin = scale.yAxis?.limit.min ?? 0;
+  const scaleMax = scale.yAxis?.limit.max ?? 1;
+  const scaleRange = scaleMax - scaleMin;
   const { labelRange } = axisData;
   let y: number;
-  const valueRatio = offsetSize / (scale.yAxis?.limit.max ?? 1);
-  const scaledValue = value * valueRatio;
+  const valueRatio = offsetSize / scaleRange;
+  const scaledValue = (value - scaleMin) * valueRatio;
 
   if (labelRange) {
     const yValueRatio = getValueRatio(scaledValue, labelRange);
