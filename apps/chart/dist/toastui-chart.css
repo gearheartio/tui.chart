@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Chart 4th Edition
- * @version 4.3.6 | Tue Jul 27 2021
+ * @version 4.4.0 | Tue Jul 27 2021
  * @author NHN. FE Development Lab <dl_javascript@nhn.com>
  * @license MIT
  */
