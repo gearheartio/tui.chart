@@ -11,7 +11,11 @@ import { extend } from './store';
 import { rgba } from '@src/helpers/color';
 import { isRangeValue } from '@src/helpers/range';
 import { isString } from '@src/helpers/utils';
-import { isExistPlotId } from '@src/helpers/plot';
+import {
+  doesChartSupportPlotElements,
+  isExistPlotId,
+  shouldFlipPlotLines,
+} from '@src/helpers/plot';
 
 type UsingVisiblePlotOptions = ValueOf<
   Omit<
@@ -21,7 +25,7 @@ type UsingVisiblePlotOptions = ValueOf<
 >;
 
 type UsingPlotLineBandOptions = ValueOf<
-  Pick<ChartOptionsMap, 'area' | 'line' | 'lineArea' | 'columnLine'>
+  Pick<ChartOptionsMap, 'area' | 'line' | 'lineArea' | 'columnLine' | 'column' | 'bar'>
 >;
 
 function getOverlappingRange(ranges: PlotBand[]) {
@@ -58,12 +62,23 @@ function getValidValue(value: string | number, categories: string[], isDateType 
   return value;
 }
 
-function makePlotLines(categories: string[], isDateType: boolean, plotLines: PlotLine[] = []) {
+function makePlotLines(
+  categories: string[],
+  isDateType: boolean,
+  plotLines: PlotLine[] = [],
+  shouldFlip = false
+) {
   return plotLines.map(({ value, color, orientation, opacity, dashSegments, width }) => {
-    const isVertical = orientation === 'vertical';
+    const isVertical = !orientation || orientation === 'vertical';
+    let validValue: number | string;
+    if (shouldFlip) {
+      validValue = isVertical ? value : getValidValue(value, categories, isDateType);
+    } else {
+      validValue = isVertical ? getValidValue(value, categories, isDateType) : value;
+    }
 
     return {
-      value: isVertical ? getValidValue(value, categories, isDateType) : value,
+      value: validValue,
       color: rgba(color, opacity),
       orientation: orientation || 'vertical',
       dashSegments,
@@ -103,17 +118,20 @@ const plot: StoreModule = {
     setPlot({ state }) {
       const { series, options } = state;
 
-      if (!(series.area || series.line)) {
+      if (!doesChartSupportPlotElements(series)) {
         return;
       }
 
       const rawCategories = state.rawCategories as string[];
       const lineAreaOptions = options as LineChartOptions | AreaChartOptions;
 
+      const shouldFlip = shouldFlipPlotLines(series);
+
       const lines: PlotLine[] = makePlotLines(
         rawCategories,
         !!options?.xAxis?.date,
-        lineAreaOptions?.plot?.lines
+        lineAreaOptions?.plot?.lines,
+        shouldFlip
       );
 
       const bands: PlotBand[] = makePlotBands(

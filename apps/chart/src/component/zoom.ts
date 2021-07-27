@@ -11,7 +11,7 @@ import {
   getCoordinateXValue,
   isCoordinateSeries,
 } from '@src/helpers/coordinate';
-import { getXPosition } from '@src/helpers/calculator';
+import { getXGroupedPosition } from '@src/helpers/calculator';
 import {
   makeRectResponderModelForCoordinateType,
   RectResponderInfoForCoordinateType,
@@ -82,7 +82,7 @@ export default class Zoom extends Component {
           }
 
           const dataIndex = getCoordinateDataIndex(datum, categories, idx, this.startIndex);
-          const x = getXPosition(
+          const x = getXGroupedPosition(
             axisData,
             this.rect.width,
             getCoordinateXValue(datum as CoordinateDataType),

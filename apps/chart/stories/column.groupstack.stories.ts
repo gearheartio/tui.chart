@@ -208,3 +208,43 @@ export const responsive = () => {
     },
   });
 };
+
+export const plotLines = () => {
+  const { el } = createChart(genderAgeGroupData, {
+    series: {
+      stack: true,
+    },
+    plot: {
+      bands: [
+        {
+          range: [
+            [1000, 10000],
+            [3000, 6000],
+          ],
+          color: '#cccccc',
+          opacity: 0.2,
+          orientation: 'horizontal',
+          mergeOverlappingRanges: false,
+        },
+      ],
+      lines: [
+        {
+          value: 3000,
+          color: '#fa2828',
+          width: 2,
+          dashSegments: [10, 2],
+          orientation: 'horizontal',
+        },
+        {
+          value: 8000,
+          color: '#28aa28',
+          width: 2,
+          dashSegments: [10, 2],
+          orientation: 'horizontal',
+        },
+      ],
+    },
+  });
+
+  return el;
+};

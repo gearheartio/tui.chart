@@ -1,6 +1,7 @@
 import { LineModel } from '../components/axis';
 import { RectModel } from '../components/series';
 
-export type PlotModels = {
-  plot: Array<LineModel | RectModel>;
+export type PlotElementsModels = {
+  line: LineModel[];
+  band: RectModel[];
 };

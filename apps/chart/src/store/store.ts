@@ -67,9 +67,7 @@ export default class Store<T extends Options> {
 
     if (isInvisible) {
       invisibleWork(() => {
-        // console.log('dispatch', name, ...args);
         this.actions[name].call(this, this, payload);
-        // console.log('dispatch end', name);
       });
     } else {
       this.actions[name].call(this, this, payload);

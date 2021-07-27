@@ -189,27 +189,52 @@ export function getMaxLengthLabelWidth(labels: string[]) {
   return getTextWidth(maxLengthLabel);
 }
 
-export function getXPosition(
+export function getXLinearPosition(
+  axisData: LabelAxisData,
+  offsetSize: number,
+  value: number,
+  scale: Scale
+) {
+  const scaleMin = scale.xAxis?.limit.min ?? 0;
+  const scaleMax = scale.xAxis?.limit.max ?? 1;
+  const scaleRange = scaleMax - scaleMin;
+  const { labelRange } = axisData;
+  let xPosition: number;
+  const valueRatio = offsetSize / scaleRange;
+  const scaledValue = (value - scaleMin) * valueRatio;
+
+  if (labelRange) {
+    const xValueRatio = getValueRatio(scaledValue, labelRange);
+    xPosition = xValueRatio * offsetSize;
+  } else {
+    xPosition = scaledValue;
+  }
+  console.log(xPosition);
+
+  return xPosition;
+}
+
+export function getXGroupedPosition(
   axisData: LabelAxisData,
   offsetSize: number,
   value: number | string | Date,
   dataIndex: number
 ) {
   const { pointOnColumn, tickDistance, labelRange } = axisData;
-  let x;
+  let xPosition;
 
   if (labelRange) {
     const xValue = isString(value) ? Number(new Date(value)) : Number(value);
     const xValueRatio = getValueRatio(xValue, labelRange);
-    x = xValueRatio * offsetSize;
+    xPosition = xValueRatio * offsetSize;
   } else {
-    x = tickDistance * dataIndex + (pointOnColumn ? tickDistance / 2 : 0);
+    xPosition = tickDistance * dataIndex + (pointOnColumn ? tickDistance / 2 : 0);
   }
 
-  return x;
+  return xPosition;
 }
 
-export function getYPosition(
+export function getYLinearPosition(
   axisData: LabelAxisData,
   offsetSize: number,
   value: number,
@@ -219,16 +244,36 @@ export function getYPosition(
   const scaleMax = scale.yAxis?.limit.max ?? 1;
   const scaleRange = scaleMax - scaleMin;
   const { labelRange } = axisData;
-  let y: number;
+  let yPosition: number;
   const valueRatio = offsetSize / scaleRange;
   const scaledValue = (value - scaleMin) * valueRatio;
 
   if (labelRange) {
     const yValueRatio = getValueRatio(scaledValue, labelRange);
-    y = offsetSize - yValueRatio * offsetSize;
+    yPosition = offsetSize - yValueRatio * offsetSize;
   } else {
-    y = offsetSize - scaledValue;
+    yPosition = offsetSize - scaledValue;
   }
 
-  return y;
+  return yPosition;
+}
+
+export function getYGroupedPosition(
+  axisData: LabelAxisData,
+  offsetSize: number,
+  value: number | string | Date,
+  dataIndex: number
+) {
+  const { pointOnColumn, tickDistance, labelRange } = axisData;
+  let yPosition;
+
+  if (labelRange) {
+    const yValue = isString(value) ? Number(new Date(value)) : Number(value);
+    const yValueRatio = getValueRatio(yValue, labelRange);
+    yPosition = yValueRatio * offsetSize;
+  } else {
+    yPosition = tickDistance * dataIndex + (pointOnColumn ? tickDistance / 2 : 0);
+  }
+
+  return yPosition;
 }

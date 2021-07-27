@@ -300,7 +300,7 @@ describe('plot options', () => {
     });
   });
 
-  it('should render rect models for bands', () => {
+  it('should not render rect models for bands', () => {
     plot.render(
       deepMergedCopy(state, {
         plot: {
@@ -324,19 +324,10 @@ describe('plot options', () => {
       })
     );
 
-    expect(plot.models.band).toEqual([
-      {
-        type: 'rect',
-        color: 'rgba(33, 33, 33, 0.2)',
-        height: 80,
-        width: 16,
-        x: 16.5,
-        y: 0.5,
-      },
-    ]);
+    expect(plot.models.band).not.toBeDefined();
   });
 
-  it('should render line models for lines', () => {
+  it('should not render line models for lines', () => {
     plot.render(
       deepMergedCopy(state, {
         plot: {
@@ -361,17 +352,6 @@ describe('plot options', () => {
       })
     );
 
-    expect(plot.models.line).toEqual([
-      {
-        type: 'line',
-        x: 64.5,
-        y: 0.5,
-        x2: 64.5,
-        y2: 80.5,
-        strokeStyle: '#ff0000',
-        dashSegments: [],
-        lineWidth: 1,
-      },
-    ]);
+    expect(plot.models.line).not.toBeDefined();
   });
 });

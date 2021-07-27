@@ -354,3 +354,45 @@ export const responsive = () => {
     },
   });
 };
+
+export const plotLines = () => {
+  const { el } = createChart(budgetDataForStack, {
+    series: {
+      stack: {
+        type: 'normal',
+      },
+    },
+    plot: {
+      bands: [
+        {
+          range: [
+            [10000, 15000],
+            [8000, 20000],
+          ],
+          color: '#bbbbbb',
+          opacity: 0.2,
+          orientation: 'horizontal',
+          mergeOverlappingRanges: false,
+        },
+      ],
+      lines: [
+        {
+          value: 21000,
+          color: '#fa2828',
+          width: 2,
+          dashSegments: [10, 2],
+          orientation: 'horizontal',
+        },
+        {
+          value: 17000,
+          color: '#28aa28',
+          width: 2,
+          dashSegments: [10, 2],
+          orientation: 'horizontal',
+        },
+      ],
+    },
+  });
+
+  return el;
+};

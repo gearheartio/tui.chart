@@ -282,6 +282,10 @@ export type LineTypePlotOptions = PlotOptions & {
   bands?: PlotBand[];
 };
 
+export type ColumnTypePlotOptions = LineTypePlotOptions;
+
+export type BarTypePlotOptions = LineTypePlotOptions;
+
 interface ExportMenuOptions {
   filename?: string;
   visible?: boolean;
@@ -485,7 +489,7 @@ export interface BoxSeriesOptions extends BaseSeriesOptions {
 export interface BarChartOptions extends BaseOptions {
   series?: BoxSeriesOptions;
   yAxis?: BarTypeYAxisOptions;
-  plot?: PlotOptions;
+  plot?: BarTypePlotOptions;
   legend?: NormalLegendOptions;
   theme?: BoxChartThemeOptions;
 }
@@ -493,7 +497,7 @@ export interface BarChartOptions extends BaseOptions {
 export interface ColumnChartOptions extends BaseOptions {
   series?: BoxSeriesOptions & { shift?: boolean };
   yAxis?: BothSidesYAxisOptions;
-  plot?: PlotOptions;
+  plot?: ColumnTypePlotOptions;
   legend?: NormalLegendOptions;
   theme?: BoxChartThemeOptions;
 }

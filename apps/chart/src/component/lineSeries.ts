@@ -19,7 +19,7 @@ import {
 import { ClipRectAreaModel, LinePointsModel } from '@t/components/series';
 import { ChartState, Scale, Series, LabelAxisData } from '@t/store/store';
 import { LineSeriesType } from '@t/options';
-import { getValueRatio, setSplineControlPoint, getXPosition } from '@src/helpers/calculator';
+import { getValueRatio, setSplineControlPoint, getXGroupedPosition } from '@src/helpers/calculator';
 import { TooltipData } from '@t/components/tooltip';
 import {
   getCoordinateDataIndex,
@@ -265,7 +265,7 @@ export default class LineSeries extends Component {
         const value = getCoordinateYValue(datum);
         const yValueRatio = getValueRatio(value, yAxisLimit);
         const y = (1 - yValueRatio) * this.rect.height;
-        const x = getXPosition(
+        const x = getXGroupedPosition(
           axisData,
           this.rect.width,
           getCoordinateXValue(datum as CoordinateDataType),

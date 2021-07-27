@@ -310,3 +310,70 @@ export const noData = () => {
 
   return el;
 };
+
+export const positiveWithPlotLines = () => {
+  const { el } = createChart(budgetData, {
+    plot: {
+      bands: [
+        {
+          range: [
+            [1000, 5000],
+            [3000, 6500],
+          ],
+          color: '#cccccc',
+          opacity: 0.2,
+          orientation: 'horizontal',
+          mergeOverlappingRanges: false,
+        },
+      ],
+      lines: [
+        {
+          value: 3000,
+          color: '#fa2828',
+          width: 2,
+          dashSegments: [10, 2],
+          orientation: 'horizontal',
+        },
+      ],
+    },
+  });
+
+  return el;
+};
+
+export const positiveAndNegativeWithPlotLines = () => {
+  const { el } = createChart(negativeBudgetData, {
+    plot: {
+      bands: [
+        {
+          range: [
+            [-1000, 5000],
+            [-3000, 2000],
+          ],
+          color: '#cccccc',
+          opacity: 0.2,
+          orientation: 'horizontal',
+          mergeOverlappingRanges: false,
+        },
+      ],
+      lines: [
+        {
+          value: 3000,
+          color: '#fa2828',
+          width: 2,
+          dashSegments: [10, 2],
+          orientation: 'horizontal',
+        },
+        {
+          value: -4000,
+          color: '#28aa28',
+          width: 2,
+          dashSegments: [10, 2],
+          orientation: 'horizontal',
+        },
+      ],
+    },
+  });
+
+  return el;
+};

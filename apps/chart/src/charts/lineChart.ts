@@ -7,6 +7,7 @@ import plot from '@src/store/plot';
 
 import Tooltip from '@src/component/tooltip';
 import Plot from '@src/component/plot';
+import PlotElements from '@src/component/plotElements';
 import LineSeries from '@src/component/lineSeries';
 import Axis from '@src/component/axis';
 import Legend from '@src/component/legend';
@@ -145,6 +146,7 @@ export default class LineChart extends Chart<LineChartOptions> {
     this.componentManager.add(Plot);
     this.componentManager.add(Legend);
     this.componentManager.add(LineSeries);
+    this.componentManager.add(PlotElements);
     this.componentManager.add(Axis, { name: 'yAxis' });
     this.componentManager.add(Axis, { name: 'xAxis' });
     this.componentManager.add(Axis, { name: 'secondaryYAxis' });

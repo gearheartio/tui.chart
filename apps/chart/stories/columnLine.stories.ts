@@ -1,4 +1,5 @@
 import ColumnLineChart from '@src/charts/columnLineChart';
+import { boolean } from '@storybook/addon-knobs';
 import { ColumnLineChartOptions, ColumnLineData } from '@t/options';
 import { deepMergedCopy, range } from '@src/helpers/utils';
 import { temperatureAverageData } from './data';
@@ -35,7 +36,8 @@ function createChart(data: ColumnLineData, customOptions: ColumnLineChartOptions
   return { el, chart };
 }
 export const basic = () => {
-  const { el } = createChart(temperatureAverageData);
+  const { el } = createChart(temperatureAverageData, {
+  });
 
   return el;
 };
@@ -243,3 +245,33 @@ export const noData = () => {
 
   return el;
 };
+
+export const horizontalPlotLines = () => {
+  const { el } = createChart(temperatureAverageData, {
+    plot: {
+      bands: [
+        {
+          range: [
+            [5, 15],
+            [10, 20],
+          ],
+          color: '#cccccc',
+          opacity: 0.2,
+          orientation: 'horizontal',
+          mergeOverlappingRanges: boolean('mergeOverlappingRanges', true),
+        },
+      ],
+      lines: [
+        {
+          value: 16,
+          color: '#fa2828',
+          width: 2,
+          dashSegments: [10, 2],
+          orientation: 'horizontal',
+        },
+      ],
+    },
+  });
+
+  return el;
+}

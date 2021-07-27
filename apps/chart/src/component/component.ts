@@ -29,6 +29,7 @@ import { ExportMenuModels } from '@t/components/exportMenu';
 import { LegendModel } from '@t/components/legend';
 import { CircleLegendModels } from '@t/components/circleLegend';
 import { PlotModels } from '@t/components/plot';
+import { PlotElementsModels } from '@t/components/plotElements';
 import { DataLabelModels, SeriesDataLabels } from '@t/components/dataLabels';
 import { ZoomModels } from '@t/components/zoom';
 import { RadialPlotModels } from '@t/components/radialPlot';
@@ -48,6 +49,7 @@ export type ComponentType =
   | 'axis'
   | 'tooltip'
   | 'plot'
+  | 'plot-elements'
   | 'circleLegend'
   | 'spectrumLegend'
   | 'dataLabels'
@@ -74,6 +76,7 @@ type ComponentModels =
   | BoxPlotSeriesModels
   | ZoomModels
   | PlotModels
+  | PlotElementsModels
   | RadialPlotModels
   | LineModel[]
   | LabelModel[]

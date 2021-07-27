@@ -346,3 +346,47 @@ export const noData = () => {
 
   return el;
 };
+
+export const plotLines = () => {
+  const { el } = createChart(negativeBudgetData, {
+    plot: {
+      bands: [
+        {
+          range: [
+            [-1000, 5000],
+            [-3000, 2000],
+          ],
+          color: '#cccccc',
+          opacity: 0.2,
+          orientation: 'vertical',
+          mergeOverlappingRanges: false,
+        },
+      ],
+      lines: [
+        {
+          value: 3000,
+          color: '#fa2828',
+          width: 2,
+          dashSegments: [10, 2],
+          orientation: 'vertical',
+        },
+        {
+          value: -4000,
+          color: '#28aa28',
+          width: 2,
+          dashSegments: [10, 2],
+          orientation: 'vertical',
+        },
+        {
+          value: 'Jul',
+          color: '#2828aa',
+          width: 2,
+          dashSegments: [10, 2],
+          orientation: 'horizontal',
+        },
+      ],
+    },
+  });
+
+  return el;
+};

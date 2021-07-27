@@ -20,6 +20,7 @@ import BoxStackSeries from '@src/component/boxStackSeries';
 import BoxSeries from '@src/component/boxSeries';
 import LineSeries from '@src/component/lineSeries';
 import Plot from '@src/component/plot';
+import PlotElements from '@src/component/plotElements';
 import Title from '@src/component/title';
 import ZeroAxis from '@src/component/zeroAxis';
 import Axis from '@src/component/axis';
@@ -160,6 +161,7 @@ export default class ColumnLineChart extends Chart<ColumnLineChartOptions> {
     this.componentManager.add(BoxStackSeries, { name: 'column' });
     this.componentManager.add(BoxSeries, { name: 'column' });
     this.componentManager.add(LineSeries);
+    this.componentManager.add(PlotElements);
     this.componentManager.add(ZeroAxis);
     this.componentManager.add(Axis, { name: 'xAxis' });
     this.componentManager.add(Axis, { name: 'yAxis' });
