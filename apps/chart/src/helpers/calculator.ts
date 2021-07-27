@@ -209,7 +209,6 @@ export function getXLinearPosition(
   } else {
     xPosition = scaledValue;
   }
-  console.log(xPosition);
 
   return xPosition;
 }
