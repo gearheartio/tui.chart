@@ -9,6 +9,7 @@ import stackSeriesData from '@src/store/stackSeriesData';
 import HoveredSeries from '@src/component/hoveredSeries';
 import Tooltip from '@src/component/tooltip';
 import Plot from '@src/component/plot';
+import PlotElements from '@src/component/plotElements';
 import AreaSeries from '@src/component/areaSeries';
 import Axis from '@src/component/axis';
 import DataLabels from '@src/component/dataLabels';
@@ -147,6 +148,7 @@ export default class AreaChart extends Chart<AreaChartOptions> {
     this.componentManager.add(Plot);
     this.componentManager.add(Legend);
     this.componentManager.add(AreaSeries);
+    this.componentManager.add(PlotElements);
     this.componentManager.add(Axis, { name: 'xAxis' });
     this.componentManager.add(Axis, { name: 'yAxis' });
     this.componentManager.add(Axis, { name: 'secondaryYAxis' });
