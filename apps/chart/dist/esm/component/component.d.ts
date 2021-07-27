@@ -9,6 +9,7 @@ import { ExportMenuModels } from "../../types/components/exportMenu";
 import { LegendModel } from "../../types/components/legend";
 import { CircleLegendModels } from "../../types/components/circleLegend";
 import { PlotModels } from "../../types/components/plot";
+import { PlotElementsModels } from "../../types/components/plotElements";
 import { DataLabelModels, SeriesDataLabels } from "../../types/components/dataLabels";
 import { ZoomModels } from "../../types/components/zoom";
 import { RadialPlotModels } from "../../types/components/radialPlot";
@@ -17,8 +18,8 @@ import { BackButtonModels, ResetButtonModels } from "../../types/components/rese
 import { SpectrumLegendModels } from "../../types/components/spectrumLegend";
 import { ResponderSeriesModel } from "./selectedSeries";
 import { RadialAxisModels } from "../../types/components/radialAxis";
-export declare type ComponentType = 'component' | 'series' | 'hoveredSeries' | 'selectedSeries' | 'legend' | 'axis' | 'tooltip' | 'plot' | 'circleLegend' | 'spectrumLegend' | 'dataLabels' | 'title' | 'axisTitle' | 'exportMenu' | 'resetButton' | 'zeroAxis' | 'zoom' | 'backButton' | 'background' | 'noDataText';
-declare type ComponentModels = AxisModels | AreaSeriesModels | BoxSeriesModels | CircleSeriesModels | LineSeriesModels | ExportMenuModels | CircleLegendModels | PieSeriesModels | RadarSeriesModels | BoxPlotSeriesModels | ZoomModels | PlotModels | RadialPlotModels | LineModel[] | LabelModel[] | DataLabelModels | LegendModel[] | HoveredSeriesModel | TreemapSeriesModels | ResetButtonModels | SpectrumLegendModels | BackButtonModels | HeatmapRectModels | NestedPieSeriesModels | ResponderSeriesModel | ScatterSeriesModels | BulletSeriesModels | BackgroundModel | RadialAxisModels | RadialBarSeriesModels | GaugeSeriesModels | NoDataTextModel;
+export declare type ComponentType = 'component' | 'series' | 'hoveredSeries' | 'selectedSeries' | 'legend' | 'axis' | 'tooltip' | 'plot' | 'plot-elements' | 'circleLegend' | 'spectrumLegend' | 'dataLabels' | 'title' | 'axisTitle' | 'exportMenu' | 'resetButton' | 'zeroAxis' | 'zoom' | 'backButton' | 'background' | 'noDataText';
+declare type ComponentModels = AxisModels | AreaSeriesModels | BoxSeriesModels | CircleSeriesModels | LineSeriesModels | ExportMenuModels | CircleLegendModels | PieSeriesModels | RadarSeriesModels | BoxPlotSeriesModels | ZoomModels | PlotModels | PlotElementsModels | RadialPlotModels | LineModel[] | LabelModel[] | DataLabelModels | LegendModel[] | HoveredSeriesModel | TreemapSeriesModels | ResetButtonModels | SpectrumLegendModels | BackButtonModels | HeatmapRectModels | NestedPieSeriesModels | ResponderSeriesModel | ScatterSeriesModels | BulletSeriesModels | BackgroundModel | RadialAxisModels | RadialBarSeriesModels | GaugeSeriesModels | NoDataTextModel;
 export declare type RespondersModel = {
     component: Component;
     detected: ResponderModel[];

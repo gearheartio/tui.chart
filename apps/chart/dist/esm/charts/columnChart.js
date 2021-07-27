@@ -1,3 +1,4 @@
+import PlotElements from "../component/plotElements";
 import Chart from "./chart";
 import dataRange from "../store/dataRange";
 import stackSeriesData from "../store/stackSeriesData";
@@ -128,6 +129,7 @@ export default class ColumnChart extends Chart {
         this.componentManager.add(Legend);
         this.componentManager.add(BoxStackSeries, { name: 'column', stackChart });
         this.componentManager.add(BoxSeries, { name: 'column', stackChart });
+        this.componentManager.add(PlotElements);
         this.componentManager.add(ZeroAxis);
         this.componentManager.add(Axis, { name: 'xAxis' });
         this.componentManager.add(Axis, { name: 'yAxis' });
@@ -200,6 +202,60 @@ export default class ColumnChart extends Chart {
         const { categories, series } = data;
         this.resetSeries();
         this.store.dispatch('setData', { series: { column: series }, categories });
+    }
+    /**
+     * Add plot line.
+     * @param {Object} data - Plot info.
+     *   @param {string|number} data.value - The value where the plot line will be drawn.
+     *   @param {string} data.color - Plot line color.
+     *   @param {string} [data.id] - Plot id. The value on which the removePlotLine is based.
+     * @api
+     * @example
+     * chart.addPlotLine({
+     *   value: 2,
+     *   color: '#00ff22',
+     *   id: 'plot-1',
+     * });
+     */
+    addPlotLine(data) {
+        this.store.dispatch('addPlotLine', { data });
+    }
+    /**
+     * Remove plot line with id.
+     * @param {string} id - Id of the plot line to be removed.
+     * @api
+     * @example
+     * chart.removePlotLine('plot-1');
+     */
+    removePlotLine(id) {
+        this.store.dispatch('removePlotLine', { id });
+    }
+    /**
+     * Add plot band.
+     * @param {Object} data - Plot info.
+     * @param {Array<string|number>} data.range - The range to be drawn.
+     * @param {string} data.color - Plot band color.
+     * @param {string} [data.id] - Plot id. The value on which the removePlotBand is based.
+     * @api
+     * @example
+     * chart.addPlotBand({
+     *   value: [2, 4],
+     *   color: '#00ff22',
+     *   id: 'plot-1',
+     * });
+     */
+    addPlotBand(data) {
+        this.store.dispatch('addPlotBand', { data });
+    }
+    /**
+     * Remove plot band with id.
+     * @param {string} id - id of the plot band to be removed.
+     * @api
+     * @example
+     * chart.removePlotBand('plot-1');
+     */
+    removePlotBand(id) {
+        this.store.dispatch('removePlotBand', { id });
     }
     /**
      * Hide series data label.

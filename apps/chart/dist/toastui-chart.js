@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Chart 4th Edition
- * @version 4.3.6 | Thu Jul 22 2021
+ * @version 4.3.6 | Tue Jul 27 2021
  * @author NHN. FE Development Lab <dl_javascript@nhn.com>
  * @license MIT
  */
@@ -7956,9 +7956,7 @@ var Store = /*#__PURE__*/function () {
       // layout을 업데이트하려고 만든 observe를 옵저버로 등록해서 무한루프
       if (isInvisible) {
         invisibleWork(function () {
-          // console.log('dispatch', name, ...args);
-          _this.actions[name].call(_this, _this, payload); // console.log('dispatch end', name);
-
+          _this.actions[name].call(_this, _this, payload);
         });
       } else {
         this.actions[name].call(this, this, payload);
@@ -9325,41 +9323,78 @@ function getMaxLengthLabelWidth(labels) {
   }, '');
   return getTextWidth(maxLengthLabel);
 }
-function getXPosition(axisData, offsetSize, value, dataIndex) {
+function getXLinearPosition(axisData, offsetSize, value, scale) {
+  var _scale$xAxis$limit$mi, _scale$xAxis, _scale$xAxis$limit$ma, _scale$xAxis2;
+
+  var scaleMin = (_scale$xAxis$limit$mi = (_scale$xAxis = scale.xAxis) === null || _scale$xAxis === void 0 ? void 0 : _scale$xAxis.limit.min) !== null && _scale$xAxis$limit$mi !== void 0 ? _scale$xAxis$limit$mi : 0;
+  var scaleMax = (_scale$xAxis$limit$ma = (_scale$xAxis2 = scale.xAxis) === null || _scale$xAxis2 === void 0 ? void 0 : _scale$xAxis2.limit.max) !== null && _scale$xAxis$limit$ma !== void 0 ? _scale$xAxis$limit$ma : 1;
+  var scaleRange = scaleMax - scaleMin;
+  var labelRange = axisData.labelRange;
+  var xPosition;
+  var valueRatio = offsetSize / scaleRange;
+  var scaledValue = (value - scaleMin) * valueRatio;
+
+  if (labelRange) {
+    var xValueRatio = getValueRatio(scaledValue, labelRange);
+    xPosition = xValueRatio * offsetSize;
+  } else {
+    xPosition = scaledValue;
+  }
+
+  console.log(xPosition);
+  return xPosition;
+}
+function getXGroupedPosition(axisData, offsetSize, value, dataIndex) {
   var pointOnColumn = axisData.pointOnColumn,
       tickDistance = axisData.tickDistance,
       labelRange = axisData.labelRange;
-  var x;
+  var xPosition;
 
   if (labelRange) {
     var xValue = utils_isString(value) ? Number(new Date(value)) : Number(value);
     var xValueRatio = getValueRatio(xValue, labelRange);
-    x = xValueRatio * offsetSize;
+    xPosition = xValueRatio * offsetSize;
   } else {
-    x = tickDistance * dataIndex + (pointOnColumn ? tickDistance / 2 : 0);
+    xPosition = tickDistance * dataIndex + (pointOnColumn ? tickDistance / 2 : 0);
   }
 
-  return x;
+  return xPosition;
 }
-function getYPosition(axisData, offsetSize, value, scale) {
+function getYLinearPosition(axisData, offsetSize, value, scale) {
   var _scale$yAxis$limit$mi, _scale$yAxis, _scale$yAxis$limit$ma, _scale$yAxis2;
 
   var scaleMin = (_scale$yAxis$limit$mi = (_scale$yAxis = scale.yAxis) === null || _scale$yAxis === void 0 ? void 0 : _scale$yAxis.limit.min) !== null && _scale$yAxis$limit$mi !== void 0 ? _scale$yAxis$limit$mi : 0;
   var scaleMax = (_scale$yAxis$limit$ma = (_scale$yAxis2 = scale.yAxis) === null || _scale$yAxis2 === void 0 ? void 0 : _scale$yAxis2.limit.max) !== null && _scale$yAxis$limit$ma !== void 0 ? _scale$yAxis$limit$ma : 1;
   var scaleRange = scaleMax - scaleMin;
   var labelRange = axisData.labelRange;
-  var y;
+  var yPosition;
   var valueRatio = offsetSize / scaleRange;
   var scaledValue = (value - scaleMin) * valueRatio;
 
   if (labelRange) {
     var yValueRatio = getValueRatio(scaledValue, labelRange);
-    y = offsetSize - yValueRatio * offsetSize;
+    yPosition = offsetSize - yValueRatio * offsetSize;
   } else {
-    y = offsetSize - scaledValue;
+    yPosition = offsetSize - scaledValue;
   }
 
-  return y;
+  return yPosition;
+}
+function getYGroupedPosition(axisData, offsetSize, value, dataIndex) {
+  var pointOnColumn = axisData.pointOnColumn,
+      tickDistance = axisData.tickDistance,
+      labelRange = axisData.labelRange;
+  var yPosition;
+
+  if (labelRange) {
+    var yValue = utils_isString(value) ? Number(new Date(value)) : Number(value);
+    var yValueRatio = getValueRatio(yValue, labelRange);
+    yPosition = yValueRatio * offsetSize;
+  } else {
+    yPosition = tickDistance * dataIndex + (pointOnColumn ? tickDistance / 2 : 0);
+  }
+
+  return yPosition;
 }
 ;// CONCATENATED MODULE: ./src/helpers/arrayUtil.ts
 
@@ -19015,6 +19050,12 @@ function isExistPlotId(plots, data) {
     return !isUndefined(bandId) && !isUndefined(data.id) && bandId === data.id;
   });
 }
+function doesChartSupportPlotElements(series) {
+  return !!(series.area || series.line || series.column || series.bar);
+}
+function shouldFlipPlotLines(series) {
+  return !!series.bar;
+}
 ;// CONCATENATED MODULE: ./src/store/plot.ts
 function plot_toConsumableArray(arr) { return plot_arrayWithoutHoles(arr) || plot_iterableToArray(arr) || plot_unsupportedIterableToArray(arr) || plot_nonIterableSpread(); }
 
@@ -19106,6 +19147,7 @@ function getValidValue(value, categories) {
 
 function makePlotLines(categories, isDateType) {
   var plotLines = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+  var shouldFlip = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
   return plotLines.map(function (_ref4) {
     var value = _ref4.value,
         color = _ref4.color,
@@ -19113,9 +19155,17 @@ function makePlotLines(categories, isDateType) {
         opacity = _ref4.opacity,
         dashSegments = _ref4.dashSegments,
         width = _ref4.width;
-    var isVertical = orientation === 'vertical';
+    var isVertical = !orientation || orientation === 'vertical';
+    var validValue;
+
+    if (shouldFlip) {
+      validValue = isVertical ? value : getValidValue(value, categories, isDateType);
+    } else {
+      validValue = isVertical ? getValidValue(value, categories, isDateType) : value;
+    }
+
     return {
-      value: isVertical ? getValidValue(value, categories, isDateType) : value,
+      value: validValue,
       color: rgba(color, opacity),
       orientation: orientation || 'vertical',
       dashSegments: dashSegments,
@@ -19170,13 +19220,14 @@ var plot = {
       var series = state.series,
           options = state.options;
 
-      if (!(series.area || series.line)) {
+      if (!doesChartSupportPlotElements(series)) {
         return;
       }
 
       var rawCategories = state.rawCategories;
       var lineAreaOptions = options;
-      var lines = makePlotLines(rawCategories, !!(options !== null && options !== void 0 && (_options$xAxis = options.xAxis) !== null && _options$xAxis !== void 0 && _options$xAxis.date), lineAreaOptions === null || lineAreaOptions === void 0 ? void 0 : (_lineAreaOptions$plot = lineAreaOptions.plot) === null || _lineAreaOptions$plot === void 0 ? void 0 : _lineAreaOptions$plot.lines);
+      var shouldFlip = shouldFlipPlotLines(series);
+      var lines = makePlotLines(rawCategories, !!(options !== null && options !== void 0 && (_options$xAxis = options.xAxis) !== null && _options$xAxis !== void 0 && _options$xAxis.date), lineAreaOptions === null || lineAreaOptions === void 0 ? void 0 : (_lineAreaOptions$plot = lineAreaOptions.plot) === null || _lineAreaOptions$plot === void 0 ? void 0 : _lineAreaOptions$plot.lines, shouldFlip);
       var bands = makePlotBands(rawCategories, !!(options !== null && options !== void 0 && (_options$xAxis2 = options.xAxis) !== null && _options$xAxis2 !== void 0 && _options$xAxis2.date), lineAreaOptions === null || lineAreaOptions === void 0 ? void 0 : (_lineAreaOptions$plot2 = lineAreaOptions.plot) === null || _lineAreaOptions$plot2 === void 0 ? void 0 : _lineAreaOptions$plot2.bands);
       store_extend(state.plot, {
         lines: lines,
@@ -19878,21 +19929,13 @@ function component_plot_toConsumableArray(arr) { return component_plot_arrayWith
 
 function component_plot_nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
+function component_plot_unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return component_plot_arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return component_plot_arrayLikeToArray(o, minLen); }
+
 function component_plot_iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
 
 function component_plot_arrayWithoutHoles(arr) { if (Array.isArray(arr)) return component_plot_arrayLikeToArray(arr); }
 
-function component_plot_slicedToArray(arr, i) { return component_plot_arrayWithHoles(arr) || component_plot_iterableToArrayLimit(arr, i) || component_plot_unsupportedIterableToArray(arr, i) || component_plot_nonIterableRest(); }
-
-function component_plot_nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function component_plot_unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return component_plot_arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return component_plot_arrayLikeToArray(o, minLen); }
-
 function component_plot_arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function component_plot_iterableToArrayLimit(arr, i) { var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]); if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function component_plot_arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 
 
@@ -19937,53 +19980,9 @@ function plot_getPrototypeOf(o) { plot_getPrototypeOf = Object.setPrototypeOf ? 
 
 function plot_defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
-
-function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
 
 
 
-
-
-function getValidIndex(index) {
-  var startIndex = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-  return ~~index ? index - startIndex : index;
-}
-
-function validXPosition(_ref) {
-  var axisData = _ref.axisData,
-      offsetSize = _ref.offsetSize,
-      value = _ref.value,
-      _ref$startIndex = _ref.startIndex,
-      startIndex = _ref$startIndex === void 0 ? 0 : _ref$startIndex;
-  var dataIndex = getValidIndex(value, startIndex);
-  var x = getXPosition(axisData, offsetSize, value, dataIndex);
-  return x > 0 ? Math.min(offsetSize, x) : 0;
-}
-
-function validYPosition(_ref2) {
-  var axisData = _ref2.axisData,
-      offsetSize = _ref2.offsetSize,
-      value = _ref2.value,
-      scale = _ref2.scale;
-  var y = getYPosition(axisData, offsetSize, value, scale);
-  return y > 0 ? Math.min(offsetSize, y) : 0;
-}
-
-function validPosition(_ref3) {
-  var vertical = _ref3.vertical,
-      rest = _objectWithoutProperties(_ref3, ["vertical"]);
-
-  var position;
-
-  if (vertical) {
-    position = validXPosition(rest);
-  } else {
-    position = validYPosition(rest);
-  }
-
-  return position;
-}
 
 function getPlotAxisData(vertical, axes) {
   return vertical ? axes.xAxis : axes.yAxis;
@@ -20006,9 +20005,7 @@ var Plot = /*#__PURE__*/function (_Component) {
     _this = _super.call.apply(_super, [this].concat(args));
 
     plot_defineProperty(plot_assertThisInitialized(_this), "models", {
-      plot: [],
-      line: [],
-      band: []
+      plot: []
     });
 
     plot_defineProperty(plot_assertThisInitialized(_this), "startIndex", 0);
@@ -20032,104 +20029,37 @@ var Plot = /*#__PURE__*/function (_Component) {
       };
     }
   }, {
-    key: "renderLines",
-    value: function renderLines(axes, categories, scale) {
-      var _this2 = this;
-
-      var lines = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
-      return lines.map(function (_ref4) {
-        var value = _ref4.value,
-            color = _ref4.color,
-            orientation = _ref4.orientation,
-            dashSegments = _ref4.dashSegments,
-            width = _ref4.width;
-        var vertical = !orientation || orientation === 'vertical';
-
-        var _this2$getPlotAxisSiz = _this2.getPlotAxisSize(vertical),
-            offsetSize = _this2$getPlotAxisSiz.offsetSize;
-
-        var position = validPosition({
-          vertical: vertical,
-          axisData: getPlotAxisData(vertical, axes),
-          offsetSize: offsetSize,
-          value: value,
-          categories: categories,
-          startIndex: _this2.startIndex,
-          scale: scale
-        });
-        return _this2.makeLineModel(vertical, position, {
-          color: color,
-          dashSegments: dashSegments,
-          lineWidth: width
-        });
-      });
-    }
-  }, {
-    key: "renderBands",
-    value: function renderBands(axes, categories, scale) {
-      var _this3 = this;
-
-      var bands = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
-      return bands.map(function (_ref5) {
-        var range = _ref5.range,
-            color = _ref5.color,
-            orientation = _ref5.orientation;
-        var vertical = !orientation || orientation === 'vertical';
-
-        var _this3$getPlotAxisSiz = _this3.getPlotAxisSize(vertical),
-            offsetSize = _this3$getPlotAxisSiz.offsetSize,
-            anchorSize = _this3$getPlotAxisSiz.anchorSize;
-
-        var _map = range.map(function (value) {
-          return validPosition({
-            vertical: vertical,
-            axisData: getPlotAxisData(vertical, axes),
-            offsetSize: offsetSize,
-            value: value,
-            categories: categories,
-            startIndex: _this3.startIndex,
-            scale: scale
-          });
-        }),
-            _map2 = component_plot_slicedToArray(_map, 2),
-            start = _map2[0],
-            end = _map2[1];
-
-        return _this3.makeBandModel(vertical, start, end, anchorSize, color);
-      });
-    }
-  }, {
     key: "renderPlotLineModels",
     value: function renderPlotLineModels(relativePositions, vertical) {
-      var _ref7,
-          _this4 = this;
+      var _ref2,
+          _this2 = this;
 
       var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
       var size = options.size,
           startPosition = options.startPosition,
           axes = options.axes;
-      var _ref6 = this.theme[vertical ? 'vertical' : 'horizontal'],
-          color = _ref6.lineColor,
-          lineWidth = _ref6.lineWidth,
-          dashSegments = _ref6.dashSegments;
-      var tickInterval = ((_ref7 = vertical ? axes === null || axes === void 0 ? void 0 : axes.xAxis : axes === null || axes === void 0 ? void 0 : axes.yAxis) === null || _ref7 === void 0 ? void 0 : _ref7.tickInterval) || 1;
+      var _ref = this.theme[vertical ? 'vertical' : 'horizontal'],
+          color = _ref.lineColor,
+          lineWidth = _ref.lineWidth,
+          dashSegments = _ref.dashSegments;
+      var tickInterval = ((_ref2 = vertical ? axes === null || axes === void 0 ? void 0 : axes.xAxis : axes === null || axes === void 0 ? void 0 : axes.yAxis) === null || _ref2 === void 0 ? void 0 : _ref2.tickInterval) || 1;
       return relativePositions.filter(function (_, idx) {
         return !(idx % tickInterval);
       }).map(function (position) {
-        return _this4.makeLineModel(vertical, position, {
+        return _this2.makeLineModel(vertical, position, {
           color: color,
           lineWidth: lineWidth,
           dashSegments: dashSegments
-        }, size !== null && size !== void 0 ? size : _this4.rect.width, startPosition !== null && startPosition !== void 0 ? startPosition : 0);
+        }, size !== null && size !== void 0 ? size : _this2.rect.width, startPosition !== null && startPosition !== void 0 ? startPosition : 0);
       });
     }
   }, {
     key: "renderPlotsForCenterYAxis",
     value: function renderPlotsForCenterYAxis(axes) {
-      var _ref8 = axes.centerYAxis,
-          xAxisHalfSize = _ref8.xAxisHalfSize,
-          secondStartX = _ref8.secondStartX,
-          yAxisHeight = _ref8.yAxisHeight; // vertical
+      var _ref3 = axes.centerYAxis,
+          xAxisHalfSize = _ref3.xAxisHalfSize,
+          secondStartX = _ref3.secondStartX,
+          yAxisHeight = _ref3.yAxisHeight; // vertical
 
       var xAxisTickCount = axes.xAxis.tickCount;
       var verticalLines = [].concat(component_plot_toConsumableArray(this.renderPlotLineModels(makeTickPixelPositions(xAxisHalfSize, xAxisTickCount), true)), component_plot_toConsumableArray(this.renderPlotLineModels(makeTickPixelPositions(xAxisHalfSize, xAxisTickCount, secondStartX), true))); // horizontal
@@ -20197,7 +20127,7 @@ var Plot = /*#__PURE__*/function (_Component) {
   }, {
     key: "render",
     value: function render(state) {
-      var _zoomRange$, _ref9;
+      var _zoomRange$;
 
       var layout = state.layout,
           axes = state.axes,
@@ -20213,12 +20143,7 @@ var Plot = /*#__PURE__*/function (_Component) {
       this.rect = layout.plot;
       this.startIndex = (_zoomRange$ = zoomRange === null || zoomRange === void 0 ? void 0 : zoomRange[0]) !== null && _zoomRange$ !== void 0 ? _zoomRange$ : 0;
       this.theme = theme.plot;
-      var categories = (_ref9 = state.categories) !== null && _ref9 !== void 0 ? _ref9 : [];
-      var lines = plot.lines,
-          bands = plot.bands,
-          visible = plot.visible;
-      this.models.line = this.renderLines(axes, categories, scale, lines);
-      this.models.band = this.renderBands(axes, categories, scale, bands);
+      var visible = plot.visible;
 
       if (visible) {
         this.models.plot = [this.renderPlotBackgroundRect()].concat(component_plot_toConsumableArray(this.renderPlots(axes, scale)));
@@ -20226,12 +20151,12 @@ var Plot = /*#__PURE__*/function (_Component) {
     }
   }, {
     key: "makeLineModel",
-    value: function makeLineModel(vertical, position, _ref10, sizeWidth) {
-      var color = _ref10.color,
-          _ref10$dashSegments = _ref10.dashSegments,
-          dashSegments = _ref10$dashSegments === void 0 ? [] : _ref10$dashSegments,
-          _ref10$lineWidth = _ref10.lineWidth,
-          lineWidth = _ref10$lineWidth === void 0 ? 1 : _ref10$lineWidth;
+    value: function makeLineModel(vertical, position, _ref4, sizeWidth) {
+      var color = _ref4.color,
+          _ref4$dashSegments = _ref4.dashSegments,
+          dashSegments = _ref4$dashSegments === void 0 ? [] : _ref4$dashSegments,
+          _ref4$lineWidth = _ref4.lineWidth,
+          lineWidth = _ref4$lineWidth === void 0 ? 1 : _ref4$lineWidth;
       var xPos = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
       var x = vertical ? crispPixel(position) : crispPixel(xPos);
       var y = vertical ? crispPixel(0) : crispPixel(position);
@@ -20273,6 +20198,423 @@ var Plot = /*#__PURE__*/function (_Component) {
   }]);
 
   return Plot;
+}(Component);
+
+
+;// CONCATENATED MODULE: ./src/component/plotElements.ts
+function plotElements_typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { plotElements_typeof = function _typeof(obj) { return typeof obj; }; } else { plotElements_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return plotElements_typeof(obj); }
+
+function plotElements_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
+
+function plotElements_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { plotElements_ownKeys(Object(source), true).forEach(function (key) { plotElements_defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { plotElements_ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function plotElements_toConsumableArray(arr) { return plotElements_arrayWithoutHoles(arr) || plotElements_iterableToArray(arr) || plotElements_unsupportedIterableToArray(arr) || plotElements_nonIterableSpread(); }
+
+function plotElements_nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function plotElements_iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function plotElements_arrayWithoutHoles(arr) { if (Array.isArray(arr)) return plotElements_arrayLikeToArray(arr); }
+
+function plotElements_slicedToArray(arr, i) { return plotElements_arrayWithHoles(arr) || plotElements_iterableToArrayLimit(arr, i) || plotElements_unsupportedIterableToArray(arr, i) || plotElements_nonIterableRest(); }
+
+function plotElements_nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function plotElements_unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return plotElements_arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return plotElements_arrayLikeToArray(o, minLen); }
+
+function plotElements_arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function plotElements_iterableToArrayLimit(arr, i) { var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]); if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function plotElements_arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function plotElements_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function plotElements_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function plotElements_createClass(Constructor, protoProps, staticProps) { if (protoProps) plotElements_defineProperties(Constructor.prototype, protoProps); if (staticProps) plotElements_defineProperties(Constructor, staticProps); return Constructor; }
+
+function plotElements_inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) plotElements_setPrototypeOf(subClass, superClass); }
+
+function plotElements_setPrototypeOf(o, p) { plotElements_setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return plotElements_setPrototypeOf(o, p); }
+
+function plotElements_createSuper(Derived) { var hasNativeReflectConstruct = plotElements_isNativeReflectConstruct(); return function _createSuperInternal() { var Super = plotElements_getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = plotElements_getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return plotElements_possibleConstructorReturn(this, result); }; }
+
+function plotElements_possibleConstructorReturn(self, call) { if (call && (plotElements_typeof(call) === "object" || typeof call === "function")) { return call; } return plotElements_assertThisInitialized(self); }
+
+function plotElements_assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function plotElements_isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function plotElements_getPrototypeOf(o) { plotElements_getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return plotElements_getPrototypeOf(o); }
+
+function plotElements_defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+
+
+
+
+
+function getValidIndex(index) {
+  var startIndex = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+  return ~~index ? index - startIndex : index;
+}
+
+function validXPosition(_ref) {
+  var axisData = _ref.axisData,
+      offsetSize = _ref.offsetSize,
+      value = _ref.value,
+      shouldFlip = _ref.shouldFlip,
+      scale = _ref.scale,
+      _ref$startIndex = _ref.startIndex,
+      startIndex = _ref$startIndex === void 0 ? 0 : _ref$startIndex;
+  var xPosition;
+
+  if (shouldFlip) {
+    xPosition = getXLinearPosition(axisData, offsetSize, value, scale);
+  } else {
+    var dataIndex = getValidIndex(value, startIndex);
+    xPosition = getXGroupedPosition(axisData, offsetSize, value, dataIndex);
+  }
+
+  return xPosition > 0 ? Math.min(offsetSize, xPosition) : 0;
+}
+
+function validYPosition(_ref2) {
+  var axisData = _ref2.axisData,
+      offsetSize = _ref2.offsetSize,
+      value = _ref2.value,
+      shouldFlip = _ref2.shouldFlip,
+      scale = _ref2.scale,
+      _ref2$startIndex = _ref2.startIndex,
+      startIndex = _ref2$startIndex === void 0 ? 0 : _ref2$startIndex;
+  var yPosition;
+
+  if (shouldFlip) {
+    var dataIndex = getValidIndex(value, startIndex);
+    yPosition = getYGroupedPosition(axisData, offsetSize, value, dataIndex);
+  } else {
+    yPosition = getYLinearPosition(axisData, offsetSize, value, scale);
+  }
+
+  return yPosition > 0 ? Math.min(offsetSize, yPosition) : 0;
+}
+
+function validPosition(params) {
+  var position;
+
+  if (params.vertical) {
+    position = validXPosition(params);
+  } else {
+    position = validYPosition(params);
+  }
+
+  return position;
+}
+
+function plotElements_getPlotAxisData(vertical, axes) {
+  return vertical ? axes.xAxis : axes.yAxis;
+}
+
+var PlotElements = /*#__PURE__*/function (_Component) {
+  plotElements_inherits(PlotElements, _Component);
+
+  var _super = plotElements_createSuper(PlotElements);
+
+  function PlotElements() {
+    var _this;
+
+    plotElements_classCallCheck(this, PlotElements);
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _super.call.apply(_super, [this].concat(args));
+
+    plotElements_defineProperty(plotElements_assertThisInitialized(_this), "models", {
+      line: [],
+      band: []
+    });
+
+    plotElements_defineProperty(plotElements_assertThisInitialized(_this), "startIndex", 0);
+
+    plotElements_defineProperty(plotElements_assertThisInitialized(_this), "theme", void 0);
+
+    return _this;
+  }
+
+  plotElements_createClass(PlotElements, [{
+    key: "initialize",
+    value: function initialize() {
+      this.type = 'plot-elements';
+    }
+  }, {
+    key: "getPlotAxisSize",
+    value: function getPlotAxisSize(vertical) {
+      return {
+        offsetSize: vertical ? this.rect.width : this.rect.height,
+        anchorSize: vertical ? this.rect.height : this.rect.width
+      };
+    }
+  }, {
+    key: "renderLines",
+    value: function renderLines(axes, categories, scale) {
+      var _this2 = this;
+
+      var lines = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
+      var shouldFlip = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
+      return lines.map(function (_ref3) {
+        var value = _ref3.value,
+            color = _ref3.color,
+            orientation = _ref3.orientation,
+            dashSegments = _ref3.dashSegments,
+            width = _ref3.width;
+        var vertical = !orientation || orientation === 'vertical';
+
+        var _this2$getPlotAxisSiz = _this2.getPlotAxisSize(vertical),
+            offsetSize = _this2$getPlotAxisSiz.offsetSize;
+
+        var position = validPosition({
+          vertical: vertical,
+          axisData: plotElements_getPlotAxisData(vertical, axes),
+          offsetSize: offsetSize,
+          value: value,
+          categories: categories,
+          startIndex: _this2.startIndex,
+          scale: scale,
+          shouldFlip: shouldFlip
+        });
+        return _this2.makeLineModel(vertical, position, {
+          color: color,
+          dashSegments: dashSegments,
+          lineWidth: width
+        });
+      });
+    }
+  }, {
+    key: "renderBands",
+    value: function renderBands(axes, categories, scale) {
+      var _this3 = this;
+
+      var bands = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
+      var shouldFlip = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
+      return bands.map(function (_ref4) {
+        var range = _ref4.range,
+            color = _ref4.color,
+            orientation = _ref4.orientation;
+        var vertical = !orientation || orientation === 'vertical';
+
+        var _this3$getPlotAxisSiz = _this3.getPlotAxisSize(vertical),
+            offsetSize = _this3$getPlotAxisSiz.offsetSize,
+            anchorSize = _this3$getPlotAxisSiz.anchorSize;
+
+        var _map = range.map(function (value) {
+          return validPosition({
+            vertical: vertical,
+            axisData: plotElements_getPlotAxisData(vertical, axes),
+            offsetSize: offsetSize,
+            value: value,
+            categories: categories,
+            startIndex: _this3.startIndex,
+            scale: scale,
+            shouldFlip: shouldFlip
+          });
+        }),
+            _map2 = plotElements_slicedToArray(_map, 2),
+            start = _map2[0],
+            end = _map2[1];
+
+        return _this3.makeBandModel(vertical, start, end, anchorSize, color);
+      });
+    }
+  }, {
+    key: "renderPlotLineModels",
+    value: function renderPlotLineModels(relativePositions, vertical) {
+      var _ref6,
+          _this4 = this;
+
+      var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+      var size = options.size,
+          startPosition = options.startPosition,
+          axes = options.axes;
+      var _ref5 = this.theme[vertical ? 'vertical' : 'horizontal'],
+          color = _ref5.lineColor,
+          lineWidth = _ref5.lineWidth,
+          dashSegments = _ref5.dashSegments;
+      var tickInterval = ((_ref6 = vertical ? axes === null || axes === void 0 ? void 0 : axes.xAxis : axes === null || axes === void 0 ? void 0 : axes.yAxis) === null || _ref6 === void 0 ? void 0 : _ref6.tickInterval) || 1;
+      return relativePositions.filter(function (_, idx) {
+        return !(idx % tickInterval);
+      }).map(function (position) {
+        return _this4.makeLineModel(vertical, position, {
+          color: color,
+          lineWidth: lineWidth,
+          dashSegments: dashSegments
+        }, size !== null && size !== void 0 ? size : _this4.rect.width, startPosition !== null && startPosition !== void 0 ? startPosition : 0);
+      });
+    }
+  }, {
+    key: "renderPlotsForCenterYAxis",
+    value: function renderPlotsForCenterYAxis(axes) {
+      var _ref7 = axes.centerYAxis,
+          xAxisHalfSize = _ref7.xAxisHalfSize,
+          secondStartX = _ref7.secondStartX,
+          yAxisHeight = _ref7.yAxisHeight; // vertical
+
+      var xAxisTickCount = axes.xAxis.tickCount;
+      var verticalLines = [].concat(plotElements_toConsumableArray(this.renderPlotLineModels(makeTickPixelPositions(xAxisHalfSize, xAxisTickCount), true)), plotElements_toConsumableArray(this.renderPlotLineModels(makeTickPixelPositions(xAxisHalfSize, xAxisTickCount, secondStartX), true))); // horizontal
+
+      var yAxisTickCount = axes.yAxis.tickCount;
+      var yAxisTickPixelPositions = makeTickPixelPositions(yAxisHeight, yAxisTickCount);
+      var horizontalLines = [].concat(plotElements_toConsumableArray(this.renderPlotLineModels(yAxisTickPixelPositions, false, {
+        size: xAxisHalfSize
+      })), plotElements_toConsumableArray(this.renderPlotLineModels(yAxisTickPixelPositions, false, {
+        size: xAxisHalfSize,
+        startPosition: secondStartX
+      })));
+      return [].concat(plotElements_toConsumableArray(verticalLines), plotElements_toConsumableArray(horizontalLines));
+    }
+  }, {
+    key: "renderPlots",
+    value: function renderPlots(axes, scale) {
+      var vertical = true;
+      return axes.centerYAxis ? this.renderPlotsForCenterYAxis(axes) : [].concat(plotElements_toConsumableArray(this.renderPlotLineModels(this.getHorizontalTickPixelPositions(axes), !vertical, {
+        axes: axes
+      })), plotElements_toConsumableArray(this.renderPlotLineModels(this.getVerticalTickPixelPositions(axes, scale), vertical, {
+        axes: axes
+      })));
+    }
+  }, {
+    key: "getVerticalTickPixelPositions",
+    value: function getVerticalTickPixelPositions(axes, scale) {
+      var _this$getPlotAxisSize = this.getPlotAxisSize(true),
+          offsetSize = _this$getPlotAxisSize.offsetSize;
+
+      var axisData = plotElements_getPlotAxisData(true, axes);
+
+      if (axisData !== null && axisData !== void 0 && axisData.labelRange) {
+        var _scale$xAxis$sizeRati, _scale$xAxis, _scale$xAxis$position, _scale$xAxis2;
+
+        var sizeRatio = (_scale$xAxis$sizeRati = scale === null || scale === void 0 ? void 0 : (_scale$xAxis = scale.xAxis) === null || _scale$xAxis === void 0 ? void 0 : _scale$xAxis.sizeRatio) !== null && _scale$xAxis$sizeRati !== void 0 ? _scale$xAxis$sizeRati : 1;
+        var positionRatio = (_scale$xAxis$position = scale === null || scale === void 0 ? void 0 : (_scale$xAxis2 = scale.xAxis) === null || _scale$xAxis2 === void 0 ? void 0 : _scale$xAxis2.positionRatio) !== null && _scale$xAxis$position !== void 0 ? _scale$xAxis$position : 0;
+        var axisSizeAppliedRatio = offsetSize * sizeRatio;
+        var additional = offsetSize * positionRatio;
+        return makeTickPixelPositions(axisSizeAppliedRatio, axisData.tickCount, additional);
+      }
+
+      return makeTickPixelPositions(offsetSize, axisData.tickCount);
+    }
+  }, {
+    key: "getHorizontalTickPixelPositions",
+    value: function getHorizontalTickPixelPositions(axes) {
+      var _this$getPlotAxisSize2 = this.getPlotAxisSize(false),
+          offsetSize = _this$getPlotAxisSize2.offsetSize;
+
+      var axisData = plotElements_getPlotAxisData(false, axes);
+      return makeTickPixelPositions(offsetSize, axisData.tickCount);
+    }
+  }, {
+    key: "renderPlotBackgroundRect",
+    value: function renderPlotBackgroundRect() {
+      return plotElements_objectSpread(plotElements_objectSpread({
+        type: 'rect',
+        x: 0,
+        y: 0
+      }, pick(this.rect, 'width', 'height')), {}, {
+        color: this.theme.backgroundColor
+      });
+    }
+  }, {
+    key: "render",
+    value: function render(state) {
+      var _zoomRange$, _ref8;
+
+      var layout = state.layout,
+          series = state.series,
+          axes = state.axes,
+          plot = state.plot,
+          zoomRange = state.zoomRange,
+          theme = state.theme,
+          scale = state.scale;
+
+      if (!plot) {
+        return;
+      }
+
+      this.rect = layout.plot;
+      this.startIndex = (_zoomRange$ = zoomRange === null || zoomRange === void 0 ? void 0 : zoomRange[0]) !== null && _zoomRange$ !== void 0 ? _zoomRange$ : 0;
+      this.theme = theme.plot;
+      var categories = (_ref8 = state.categories) !== null && _ref8 !== void 0 ? _ref8 : [];
+      var lines = plot.lines,
+          bands = plot.bands;
+      var flipLines = shouldFlipPlotLines(series);
+      this.models.line = this.renderLines(axes, categories, scale, lines, flipLines);
+      this.models.band = this.renderBands(axes, categories, scale, bands, flipLines);
+    }
+  }, {
+    key: "makeLineModel",
+    value: function makeLineModel(vertical, position, _ref9, sizeWidth) {
+      var color = _ref9.color,
+          _ref9$dashSegments = _ref9.dashSegments,
+          dashSegments = _ref9$dashSegments === void 0 ? [] : _ref9$dashSegments,
+          _ref9$lineWidth = _ref9.lineWidth,
+          lineWidth = _ref9$lineWidth === void 0 ? 1 : _ref9$lineWidth;
+      var xPos = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
+      var x = vertical ? crispPixel(position) : crispPixel(xPos);
+      var y = vertical ? crispPixel(0) : crispPixel(position);
+      var width = vertical ? 0 : sizeWidth !== null && sizeWidth !== void 0 ? sizeWidth : this.rect.width;
+      var height = vertical ? this.rect.height : 0;
+      return {
+        type: 'line',
+        x: x,
+        y: y,
+        x2: x + width,
+        y2: y + height,
+        strokeStyle: color,
+        lineWidth: lineWidth,
+        dashSegments: dashSegments
+      };
+    }
+  }, {
+    key: "makeBandModel",
+    value: function makeBandModel(vertical, start, end, anchorSize, color) {
+      var x = vertical ? crispPixel(start) : crispPixel(0);
+      var y = vertical ? crispPixel(0) : crispPixel(start);
+      var width = vertical ? end - start : anchorSize;
+      var height = vertical ? anchorSize : end - start;
+      return {
+        type: 'rect',
+        x: x,
+        y: y,
+        width: width,
+        height: height,
+        color: color
+      };
+    }
+  }]);
+
+  return PlotElements;
 }(Component);
 
 
@@ -21554,7 +21896,7 @@ var LineSeries = /*#__PURE__*/function (_Component) {
           var value = getCoordinateYValue(datum);
           var yValueRatio = getValueRatio(value, yAxisLimit);
           var y = (1 - yValueRatio) * _this3.rect.height;
-          var x = getXPosition(axisData, _this3.rect.width, getCoordinateXValue(datum), getCoordinateDataIndex(datum, categories, idx, _this3.startIndex));
+          var x = getXGroupedPosition(axisData, _this3.rect.width, getCoordinateXValue(datum), getCoordinateDataIndex(datum, categories, idx, _this3.startIndex));
           points.push({
             x: x,
             y: y,
@@ -22765,9 +23107,9 @@ function hoveredSeries_iterableToArrayLimit(arr, i) { var _i = arr && (typeof Sy
 
 function hoveredSeries_arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-function hoveredSeries_objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = hoveredSeries_objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
+function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
 
-function hoveredSeries_objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
+function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
 
 function hoveredSeries_toConsumableArray(arr) { return hoveredSeries_arrayWithoutHoles(arr) || hoveredSeries_iterableToArray(arr) || hoveredSeries_unsupportedIterableToArray(arr) || hoveredSeries_nonIterableSpread(); }
 
@@ -22903,7 +23245,7 @@ var HoveredSeries = /*#__PURE__*/function (_Component) {
 
       var _this$models = this.models,
           guideLine = _this$models.guideLine,
-          models = hoveredSeries_objectWithoutProperties(_this$models, ["guideLine"]);
+          models = _objectWithoutProperties(_this$models, ["guideLine"]);
 
       return (_ref2 = type ? models[type] : Object.values(models)) === null || _ref2 === void 0 ? void 0 : _ref2.flatMap(function (val) {
         return val;
@@ -23138,7 +23480,7 @@ var Zoom = /*#__PURE__*/function (_Component) {
             }
 
             var dataIndex = getCoordinateDataIndex(datum, categories, idx, _this2.startIndex);
-            var x = getXPosition(axisData, _this2.rect.width, getCoordinateXValue(datum), dataIndex);
+            var x = getXGroupedPosition(axisData, _this2.rect.width, getCoordinateXValue(datum), dataIndex);
             var xWithinRect = x >= 0 && x <= _this2.rect.width;
 
             if (!duplicateCheckMap[x] && xWithinRect) {
@@ -24272,6 +24614,7 @@ function lineChart_getPrototypeOf(o) { lineChart_getPrototypeOf = Object.setProt
 
 
 
+
 /**
  * @class
  * @classdesc Line Chart
@@ -24386,6 +24729,7 @@ var LineChart = /*#__PURE__*/function (_Chart) {
       this.componentManager.add(Plot);
       this.componentManager.add(Legend);
       this.componentManager.add(LineSeries);
+      this.componentManager.add(PlotElements);
       this.componentManager.add(Axis, {
         name: 'yAxis'
       });
@@ -32217,6 +32561,7 @@ function barChart_getPrototypeOf(o) { barChart_getPrototypeOf = Object.setProtot
 
 
 
+
 /**
  * @class
  * @classdesc Bar Chart
@@ -32336,16 +32681,17 @@ var BarChart = /*#__PURE__*/function (_Chart) {
         name: 'bar',
         stackChart: stackChart
       });
-      this.componentManager.add(BoxStackSeries, {
-        name: 'bar',
-        stackChart: stackChart
-      });
+      this.componentManager.add(PlotElements);
       this.componentManager.add(ZeroAxis);
       this.componentManager.add(Axis, {
         name: 'yAxis'
       });
       this.componentManager.add(Axis, {
         name: 'xAxis'
+      });
+      this.componentManager.add(BoxStackSeries, {
+        name: 'bar',
+        stackChart: stackChart
       });
       this.componentManager.add(Axis, {
         name: 'secondaryYAxis'
@@ -32656,6 +33002,7 @@ function columnChart_getPrototypeOf(o) { columnChart_getPrototypeOf = Object.set
 
 
 
+
 /**
  * @class
  * @classdesc Column Chart
@@ -32780,6 +33127,7 @@ var ColumnChart = /*#__PURE__*/function (_Chart) {
         name: 'column',
         stackChart: stackChart
       });
+      this.componentManager.add(PlotElements);
       this.componentManager.add(ZeroAxis);
       this.componentManager.add(Axis, {
         name: 'xAxis'
@@ -32876,6 +33224,80 @@ var ColumnChart = /*#__PURE__*/function (_Chart) {
           column: series
         },
         categories: categories
+      });
+    }
+    /**
+     * Add plot line.
+     * @param {Object} data - Plot info.
+     *   @param {string|number} data.value - The value where the plot line will be drawn.
+     *   @param {string} data.color - Plot line color.
+     *   @param {string} [data.id] - Plot id. The value on which the removePlotLine is based.
+     * @api
+     * @example
+     * chart.addPlotLine({
+     *   value: 2,
+     *   color: '#00ff22',
+     *   id: 'plot-1',
+     * });
+     */
+
+  }, {
+    key: "addPlotLine",
+    value: function addPlotLine(data) {
+      this.store.dispatch('addPlotLine', {
+        data: data
+      });
+    }
+    /**
+     * Remove plot line with id.
+     * @param {string} id - Id of the plot line to be removed.
+     * @api
+     * @example
+     * chart.removePlotLine('plot-1');
+     */
+
+  }, {
+    key: "removePlotLine",
+    value: function removePlotLine(id) {
+      this.store.dispatch('removePlotLine', {
+        id: id
+      });
+    }
+    /**
+     * Add plot band.
+     * @param {Object} data - Plot info.
+     * @param {Array<string|number>} data.range - The range to be drawn.
+     * @param {string} data.color - Plot band color.
+     * @param {string} [data.id] - Plot id. The value on which the removePlotBand is based.
+     * @api
+     * @example
+     * chart.addPlotBand({
+     *   value: [2, 4],
+     *   color: '#00ff22',
+     *   id: 'plot-1',
+     * });
+     */
+
+  }, {
+    key: "addPlotBand",
+    value: function addPlotBand(data) {
+      this.store.dispatch('addPlotBand', {
+        data: data
+      });
+    }
+    /**
+     * Remove plot band with id.
+     * @param {string} id - id of the plot band to be removed.
+     * @api
+     * @example
+     * chart.removePlotBand('plot-1');
+     */
+
+  }, {
+    key: "removePlotBand",
+    value: function removePlotBand(id) {
+      this.store.dispatch('removePlotBand', {
+        id: id
       });
     }
     /**
@@ -33088,6 +33510,7 @@ function columnLineChart_getPrototypeOf(o) { columnLineChart_getPrototypeOf = Ob
 
 
 
+
 function hasPointEventType(respondersModel, name) {
   return respondersModel.find(function (_ref) {
     var component = _ref.component;
@@ -33221,6 +33644,7 @@ var ColumnLineChart = /*#__PURE__*/function (_Chart) {
         name: 'column'
       });
       this.componentManager.add(LineSeries);
+      this.componentManager.add(PlotElements);
       this.componentManager.add(ZeroAxis);
       this.componentManager.add(Axis, {
         name: 'xAxis'

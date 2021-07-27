@@ -1,5 +1,5 @@
 import Chart from "./chart";
-import { ColumnChartOptions, BoxSeriesData, BoxSeriesDataType, BoxSeriesInput } from "../../types/options";
+import { ColumnChartOptions, BoxSeriesData, BoxSeriesDataType, BoxSeriesInput, PlotLine, PlotBand } from "../../types/options";
 import { ColumnChartProps, SelectSeriesInfo } from "../../types/charts";
 /**
  * @class
@@ -127,6 +127,52 @@ export default class ColumnChart extends Chart<ColumnChartOptions> {
      * });
      */
     setData(data: BoxSeriesData): void;
+    /**
+     * Add plot line.
+     * @param {Object} data - Plot info.
+     *   @param {string|number} data.value - The value where the plot line will be drawn.
+     *   @param {string} data.color - Plot line color.
+     *   @param {string} [data.id] - Plot id. The value on which the removePlotLine is based.
+     * @api
+     * @example
+     * chart.addPlotLine({
+     *   value: 2,
+     *   color: '#00ff22',
+     *   id: 'plot-1',
+     * });
+     */
+    addPlotLine(data: PlotLine): void;
+    /**
+     * Remove plot line with id.
+     * @param {string} id - Id of the plot line to be removed.
+     * @api
+     * @example
+     * chart.removePlotLine('plot-1');
+     */
+    removePlotLine(id: string): void;
+    /**
+     * Add plot band.
+     * @param {Object} data - Plot info.
+     * @param {Array<string|number>} data.range - The range to be drawn.
+     * @param {string} data.color - Plot band color.
+     * @param {string} [data.id] - Plot id. The value on which the removePlotBand is based.
+     * @api
+     * @example
+     * chart.addPlotBand({
+     *   value: [2, 4],
+     *   color: '#00ff22',
+     *   id: 'plot-1',
+     * });
+     */
+    addPlotBand(data: PlotBand): void;
+    /**
+     * Remove plot band with id.
+     * @param {string} id - id of the plot band to be removed.
+     * @api
+     * @example
+     * chart.removePlotBand('plot-1');
+     */
+    removePlotBand(id: string): void;
     /**
      * Hide series data label.
      * @api

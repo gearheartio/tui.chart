@@ -31,9 +31,7 @@ export default class Store {
         // layout을 업데이트하려고 만든 observe를 옵저버로 등록해서 무한루프
         if (isInvisible) {
             invisibleWork(() => {
-                // console.log('dispatch', name, ...args);
                 this.actions[name].call(this, this, payload);
-                // console.log('dispatch end', name);
             });
         }
         else {

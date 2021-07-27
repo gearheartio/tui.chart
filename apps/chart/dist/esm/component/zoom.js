@@ -3,7 +3,7 @@ import { isNull, range } from "../helpers/utils";
 import { sortNumber } from "../helpers/utils";
 import { makeObservableObjectToNormal } from "../store/reactive";
 import { getCoordinateDataIndex, getCoordinateXValue, isCoordinateSeries, } from "../helpers/coordinate";
-import { getXPosition } from "../helpers/calculator";
+import { getXGroupedPosition } from "../helpers/calculator";
 import { makeRectResponderModelForCoordinateType, } from "../helpers/responders";
 const DRAG_MIN_WIDTH = 15;
 export default class Zoom extends Component {
@@ -48,7 +48,7 @@ export default class Zoom extends Component {
                         return;
                     }
                     const dataIndex = getCoordinateDataIndex(datum, categories, idx, this.startIndex);
-                    const x = getXPosition(axisData, this.rect.width, getCoordinateXValue(datum), dataIndex);
+                    const x = getXGroupedPosition(axisData, this.rect.width, getCoordinateXValue(datum), dataIndex);
                     const xWithinRect = x >= 0 && x <= this.rect.width;
                     if (!duplicateCheckMap[x] && xWithinRect) {
                         duplicateCheckMap[x] = true;

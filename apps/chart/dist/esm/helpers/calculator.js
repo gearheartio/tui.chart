@@ -138,34 +138,66 @@ export function getMaxLengthLabelWidth(labels) {
     const maxLengthLabel = labels.reduce((acc, cur) => (acc.length > cur.length ? acc : cur), '');
     return getTextWidth(maxLengthLabel);
 }
-export function getXPosition(axisData, offsetSize, value, dataIndex) {
+export function getXLinearPosition(axisData, offsetSize, value, scale) {
+    var _a, _b, _c, _d;
+    const scaleMin = (_b = (_a = scale.xAxis) === null || _a === void 0 ? void 0 : _a.limit.min, (_b !== null && _b !== void 0 ? _b : 0));
+    const scaleMax = (_d = (_c = scale.xAxis) === null || _c === void 0 ? void 0 : _c.limit.max, (_d !== null && _d !== void 0 ? _d : 1));
+    const scaleRange = scaleMax - scaleMin;
+    const { labelRange } = axisData;
+    let xPosition;
+    const valueRatio = offsetSize / scaleRange;
+    const scaledValue = (value - scaleMin) * valueRatio;
+    if (labelRange) {
+        const xValueRatio = getValueRatio(scaledValue, labelRange);
+        xPosition = xValueRatio * offsetSize;
+    }
+    else {
+        xPosition = scaledValue;
+    }
+    console.log(xPosition);
+    return xPosition;
+}
+export function getXGroupedPosition(axisData, offsetSize, value, dataIndex) {
     const { pointOnColumn, tickDistance, labelRange } = axisData;
-    let x;
+    let xPosition;
     if (labelRange) {
         const xValue = isString(value) ? Number(new Date(value)) : Number(value);
         const xValueRatio = getValueRatio(xValue, labelRange);
-        x = xValueRatio * offsetSize;
+        xPosition = xValueRatio * offsetSize;
     }
     else {
-        x = tickDistance * dataIndex + (pointOnColumn ? tickDistance / 2 : 0);
+        xPosition = tickDistance * dataIndex + (pointOnColumn ? tickDistance / 2 : 0);
     }
-    return x;
+    return xPosition;
 }
-export function getYPosition(axisData, offsetSize, value, scale) {
+export function getYLinearPosition(axisData, offsetSize, value, scale) {
     var _a, _b, _c, _d;
     const scaleMin = (_b = (_a = scale.yAxis) === null || _a === void 0 ? void 0 : _a.limit.min, (_b !== null && _b !== void 0 ? _b : 0));
     const scaleMax = (_d = (_c = scale.yAxis) === null || _c === void 0 ? void 0 : _c.limit.max, (_d !== null && _d !== void 0 ? _d : 1));
     const scaleRange = scaleMax - scaleMin;
     const { labelRange } = axisData;
-    let y;
+    let yPosition;
     const valueRatio = offsetSize / scaleRange;
     const scaledValue = (value - scaleMin) * valueRatio;
     if (labelRange) {
         const yValueRatio = getValueRatio(scaledValue, labelRange);
-        y = offsetSize - yValueRatio * offsetSize;
+        yPosition = offsetSize - yValueRatio * offsetSize;
     }
     else {
-        y = offsetSize - scaledValue;
+        yPosition = offsetSize - scaledValue;
     }
-    return y;
+    return yPosition;
+}
+export function getYGroupedPosition(axisData, offsetSize, value, dataIndex) {
+    const { pointOnColumn, tickDistance, labelRange } = axisData;
+    let yPosition;
+    if (labelRange) {
+        const yValue = isString(value) ? Number(new Date(value)) : Number(value);
+        const yValueRatio = getValueRatio(yValue, labelRange);
+        yPosition = yValueRatio * offsetSize;
+    }
+    else {
+        yPosition = tickDistance * dataIndex + (pointOnColumn ? tickDistance / 2 : 0);
+    }
+    return yPosition;
 }

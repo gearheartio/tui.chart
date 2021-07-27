@@ -2,7 +2,7 @@ import { extend } from "./store";
 import { rgba } from "../helpers/color";
 import { isRangeValue } from "../helpers/range";
 import { isString } from "../helpers/utils";
-import { isExistPlotId } from "../helpers/plot";
+import { doesChartSupportPlotElements, isExistPlotId, shouldFlipPlotLines, } from "../helpers/plot";
 function getOverlappingRange(ranges) {
     const overlappingRanges = ranges.reduce((acc, { range }) => {
         const [accStart, accEnd] = acc;
@@ -27,11 +27,18 @@ function getValidValue(value, categories, isDateType = false) {
     }
     return value;
 }
-function makePlotLines(categories, isDateType, plotLines = []) {
+function makePlotLines(categories, isDateType, plotLines = [], shouldFlip = false) {
     return plotLines.map(({ value, color, orientation, opacity, dashSegments, width }) => {
-        const isVertical = orientation === 'vertical';
+        const isVertical = !orientation || orientation === 'vertical';
+        let validValue;
+        if (shouldFlip) {
+            validValue = isVertical ? value : getValidValue(value, categories, isDateType);
+        }
+        else {
+            validValue = isVertical ? getValidValue(value, categories, isDateType) : value;
+        }
         return {
-            value: isVertical ? getValidValue(value, categories, isDateType) : value,
+            value: validValue,
             color: rgba(color, opacity),
             orientation: orientation || 'vertical',
             dashSegments,
@@ -67,12 +74,13 @@ const plot = {
         setPlot({ state }) {
             var _a, _b, _c, _d, _e, _f, _g, _h;
             const { series, options } = state;
-            if (!(series.area || series.line)) {
+            if (!doesChartSupportPlotElements(series)) {
                 return;
             }
             const rawCategories = state.rawCategories;
             const lineAreaOptions = options;
-            const lines = makePlotLines(rawCategories, !!((_b = (_a = options) === null || _a === void 0 ? void 0 : _a.xAxis) === null || _b === void 0 ? void 0 : _b.date), (_d = (_c = lineAreaOptions) === null || _c === void 0 ? void 0 : _c.plot) === null || _d === void 0 ? void 0 : _d.lines);
+            const shouldFlip = shouldFlipPlotLines(series);
+            const lines = makePlotLines(rawCategories, !!((_b = (_a = options) === null || _a === void 0 ? void 0 : _a.xAxis) === null || _b === void 0 ? void 0 : _b.date), (_d = (_c = lineAreaOptions) === null || _c === void 0 ? void 0 : _c.plot) === null || _d === void 0 ? void 0 : _d.lines, shouldFlip);
             const bands = makePlotBands(rawCategories, !!((_f = (_e = options) === null || _e === void 0 ? void 0 : _e.xAxis) === null || _f === void 0 ? void 0 : _f.date), (_h = (_g = lineAreaOptions) === null || _g === void 0 ? void 0 : _g.plot) === null || _h === void 0 ? void 0 : _h.bands);
             extend(state.plot, { lines, bands });
         },

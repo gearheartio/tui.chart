@@ -16,5 +16,7 @@ export declare function setSplineControlPoint(points: (BezierPoint | null)[]): v
 export declare function getValueRatio(value: number, { min, max }: ValueEdge): number;
 export declare function getDistance(point1: Point, point2: Point): number;
 export declare function getMaxLengthLabelWidth(labels: string[]): number;
-export declare function getXPosition(axisData: LabelAxisData, offsetSize: number, value: number | string | Date, dataIndex: number): any;
-export declare function getYPosition(axisData: LabelAxisData, offsetSize: number, value: number, scale: Scale): number;
+export declare function getXLinearPosition(axisData: LabelAxisData, offsetSize: number, value: number, scale: Scale): number;
+export declare function getXGroupedPosition(axisData: LabelAxisData, offsetSize: number, value: number | string | Date, dataIndex: number): any;
+export declare function getYLinearPosition(axisData: LabelAxisData, offsetSize: number, value: number, scale: Scale): number;
+export declare function getYGroupedPosition(axisData: LabelAxisData, offsetSize: number, value: number | string | Date, dataIndex: number): any;

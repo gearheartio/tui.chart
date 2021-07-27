@@ -1,12 +1,12 @@
+import { PlotElementsModels } from "../../types/components/plotElements";
 import Component from "./component";
 import { ChartState, Options, Axes, Scale } from "../../types/store/store";
-import Painter from "../painter";
 import { LineModel } from "../../types/components/axis";
-import { PlotModels } from "../../types/components/plot";
 import { RectModel } from "../../types/components/series";
+import { PlotLine, PlotBand } from "../../types/options";
 import { PlotTheme } from "../../types/theme";
-export default class Plot extends Component {
-    models: PlotModels;
+export default class PlotElements extends Component {
+    models: PlotElementsModels;
     startIndex: number;
     theme: Required<PlotTheme>;
     initialize(): void;
@@ -14,6 +14,8 @@ export default class Plot extends Component {
         offsetSize: number;
         anchorSize: number;
     };
+    renderLines(axes: Axes, categories: string[], scale: Scale, lines?: PlotLine[], shouldFlip?: boolean): LineModel[];
+    renderBands(axes: Axes, categories: string[], scale: Scale, bands?: PlotBand[], shouldFlip?: boolean): RectModel[];
     renderPlotLineModels(relativePositions: number[], vertical: boolean, options?: {
         size?: number;
         startPosition?: number;
@@ -31,5 +33,4 @@ export default class Plot extends Component {
         lineWidth?: number;
     }, sizeWidth?: number, xPos?: number): LineModel;
     makeBandModel(vertical: boolean, start: number, end: number, anchorSize: number, color: string): RectModel;
-    beforeDraw(painter: Painter): void;
 }

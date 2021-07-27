@@ -1,5 +1,5 @@
 import Component from "./component";
-import { getValueRatio, setSplineControlPoint, getXPosition } from "../helpers/calculator";
+import { getValueRatio, setSplineControlPoint, getXGroupedPosition } from "../helpers/calculator";
 import { getCoordinateDataIndex, getCoordinateXValue, getCoordinateYValue, isCoordinateSeries, } from "../helpers/coordinate";
 import { getRGBA } from "../helpers/color";
 import { includes, isNull } from "../helpers/utils";
@@ -186,7 +186,7 @@ export default class LineSeries extends Component {
                 const value = getCoordinateYValue(datum);
                 const yValueRatio = getValueRatio(value, yAxisLimit);
                 const y = (1 - yValueRatio) * this.rect.height;
-                const x = getXPosition(axisData, this.rect.width, getCoordinateXValue(datum), getCoordinateDataIndex(datum, categories, idx, this.startIndex));
+                const x = getXGroupedPosition(axisData, this.rect.width, getCoordinateXValue(datum), getCoordinateDataIndex(datum, categories, idx, this.startIndex));
                 points.push({ x, y, value });
             });
             if (spline) {

@@ -55,7 +55,7 @@ export default class BoxSeries extends Component {
     protected getOptions(chartOptions: BarChartOptions | ColumnChartOptions | ColumnLineChartOptions): {
         series?: BoxSeriesOptions | undefined;
         yAxis?: import("../../types/options").BarTypeYAxisOption | import("../../types/options").BarTypeYAxisOption[] | undefined;
-        plot?: import("../../types/options").PlotOptions | undefined;
+        plot?: import("../../types/options").LineTypePlotOptions | undefined;
         legend?: import("../../types/options").NormalLegendOptions | undefined;
         theme?: import("../../types/theme").BoxChartThemeOptions | undefined;
         chart?: import("../../types/options").BaseChartOptions | undefined;
@@ -70,7 +70,7 @@ export default class BoxSeries extends Component {
             shift?: boolean | undefined;
         }) | undefined;
         yAxis?: import("../../types/options").YAxisOptions | import("../../types/options").YAxisOptions[] | undefined;
-        plot?: import("../../types/options").PlotOptions | undefined;
+        plot?: import("../../types/options").LineTypePlotOptions | undefined;
         legend?: import("../../types/options").NormalLegendOptions | undefined;
         theme?: import("../../types/theme").BoxChartThemeOptions | undefined;
         chart?: import("../../types/options").BaseChartOptions | undefined;
