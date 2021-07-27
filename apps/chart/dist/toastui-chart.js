@@ -32678,6 +32678,10 @@ var BarChart = /*#__PURE__*/function (_Chart) {
       this.componentManager.add(Title);
       this.componentManager.add(Plot);
       this.componentManager.add(Legend);
+      this.componentManager.add(BoxStackSeries, {
+        name: 'bar',
+        stackChart: stackChart
+      });
       this.componentManager.add(BoxSeries, {
         name: 'bar',
         stackChart: stackChart
@@ -32689,10 +32693,6 @@ var BarChart = /*#__PURE__*/function (_Chart) {
       });
       this.componentManager.add(Axis, {
         name: 'xAxis'
-      });
-      this.componentManager.add(BoxStackSeries, {
-        name: 'bar',
-        stackChart: stackChart
       });
       this.componentManager.add(Axis, {
         name: 'secondaryYAxis'
