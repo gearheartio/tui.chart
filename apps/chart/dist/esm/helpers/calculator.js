@@ -154,7 +154,6 @@ export function getXLinearPosition(axisData, offsetSize, value, scale) {
     else {
         xPosition = scaledValue;
     }
-    console.log(xPosition);
     return xPosition;
 }
 export function getXGroupedPosition(axisData, offsetSize, value, dataIndex) {

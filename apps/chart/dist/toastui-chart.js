@@ -9341,7 +9341,6 @@ function getXLinearPosition(axisData, offsetSize, value, scale) {
     xPosition = scaledValue;
   }
 
-  console.log(xPosition);
   return xPosition;
 }
 function getXGroupedPosition(axisData, offsetSize, value, dataIndex) {
@@ -28504,6 +28503,7 @@ function areaChart_getPrototypeOf(o) { areaChart_getPrototypeOf = Object.setProt
 
 
 
+
 /**
  * @class
  * @classdesc Area Chart
@@ -28617,6 +28617,7 @@ var AreaChart = /*#__PURE__*/function (_Chart) {
       this.componentManager.add(Plot);
       this.componentManager.add(Legend);
       this.componentManager.add(AreaSeries);
+      this.componentManager.add(PlotElements);
       this.componentManager.add(Axis, {
         name: 'xAxis'
       });
