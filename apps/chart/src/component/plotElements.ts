@@ -1,24 +1,20 @@
 import { shouldFlipPlotLines } from '@src/helpers/plot';
+import { getTitleFontString } from '@src/helpers/style';
+import { makeCommonTextTheme } from '@src/helpers/theme';
+import { LabelStyle, LabelStyleName } from '@t/brushes';
 import { PlotElementsModels } from '@t/components/plotElements';
 import Component from './component';
-import {
-  ChartState,
-  Options,
-  Axes,
-  ValueEdge,
-  LabelAxisData,
-  Scale,
-} from '@t/store/store';
+import { ChartState, Options, Axes, ValueEdge, LabelAxisData, Scale } from '@t/store/store';
 import {
   crispPixel,
   makeTickPixelPositions,
   getXGroupedPosition,
   getYLinearPosition,
   getXLinearPosition,
-  getYGroupedPosition,
+  getYGroupedPosition, getTextHeight, getTextWidth,
 } from '@src/helpers/calculator';
-import { LineModel } from '@t/components/axis';
-import { RectModel } from '@t/components/series';
+import { LabelModel, LineModel } from '@t/components/axis';
+import { RectModel, StyleProp } from '@t/components/series';
 import { PlotLine, PlotBand, PlotRangeType } from '@t/options';
 import { PlotTheme, LineTheme } from '@t/theme';
 import { pick } from '@src/helpers/utils';
@@ -34,6 +30,9 @@ type PositionParam = {
   shouldFlip: boolean;
   vertical: boolean;
 };
+
+const lineLabelXOffsetPx = 12;
+const lineLabelYOffsetPx = 15;
 
 function getValidIndex(index: number, startIndex = 0): number {
   return ~~index ? index - startIndex : index;
@@ -93,7 +92,7 @@ function getPlotAxisData(vertical: boolean, axes: Axes) {
 }
 
 export default class PlotElements extends Component {
-  models: PlotElementsModels = { line: [], band: [] };
+  models: PlotElementsModels = { line: [], band: [], label: [] };
 
   startIndex = 0;
 
@@ -117,7 +116,7 @@ export default class PlotElements extends Component {
     lines: PlotLine[] = [],
     shouldFlip = false
   ): LineModel[] {
-    return lines.map(({ value, color, orientation, dashSegments, width }) => {
+    return lines.map(({ value, color, orientation, dashSegments, width, name }) => {
       const vertical = !orientation || orientation === 'vertical';
       const { offsetSize } = this.getPlotAxisSize(vertical);
       const position = validPosition({
@@ -131,7 +130,12 @@ export default class PlotElements extends Component {
         shouldFlip,
       });
 
-      return this.makeLineModel(vertical, position, { color, dashSegments, lineWidth: width });
+      return this.makeLineModel(vertical, position, {
+        color,
+        dashSegments,
+        lineWidth: width,
+        name,
+      });
     });
   }
 
@@ -278,6 +282,7 @@ export default class PlotElements extends Component {
 
     this.models.line = this.renderLines(axes, categories, scale, lines, flipLines);
     this.models.band = this.renderBands(axes, categories, scale, bands, flipLines);
+    this.models.label = this.renderLabelModels(this.models.line);
   }
 
   makeLineModel(
@@ -286,8 +291,9 @@ export default class PlotElements extends Component {
     {
       color,
       dashSegments = [],
+      name,
       lineWidth = 1,
-    }: { color: string; dashSegments?: number[]; lineWidth?: number },
+    }: { color: string; name?: string; dashSegments?: number[]; lineWidth?: number },
     sizeWidth?: number,
     xPos = 0
   ): LineModel {
@@ -302,6 +308,7 @@ export default class PlotElements extends Component {
       y,
       x2: x + width,
       y2: y + height,
+      name,
       strokeStyle: color,
       lineWidth,
       dashSegments,
@@ -321,5 +328,52 @@ export default class PlotElements extends Component {
     const height = vertical ? anchorSize : end - start;
 
     return { type: 'rect', x, y, width, height, color };
+  }
+
+  renderLabelModels(lineModels: LineModel[]): LabelModel[] {
+    const font = makeCommonTextTheme();
+    font.fontWeight = 'bold';
+    const textAlign = 'left';
+    const fontString = getTitleFontString(font);
+    const style: StyleProp<LabelStyle, LabelStyleName> = [
+      'default',
+      { textAlign, font: getTitleFontString(font), fillStyle: 'black' },
+    ];
+
+    return lineModels.map((lineModel) => {
+      const name = lineModel.name ?? '';
+      const textHeight = getTextHeight(name, fontString);
+      const textWidth = getTextWidth(name, fontString);
+      const { x, y } = this.getLabelCoords(lineModel, textHeight, textWidth);
+
+      return {
+        type: 'label',
+        text: name,
+        style,
+        x,
+        y,
+      };
+    });
+  }
+
+  private getLabelCoords(
+    lineModel: LineModel,
+    textHeight: number,
+    textWidth: number
+  ): { x: number; y: number } {
+    const isVertical = lineModel.x === lineModel.x2;
+    const fitsHorizontally = lineModel.x + lineLabelXOffsetPx + textWidth < this.rect.width;
+    const x = fitsHorizontally
+      ? lineModel.x + lineLabelXOffsetPx
+      : lineModel.x - lineLabelXOffsetPx - textWidth;
+    let y: number;
+    if (isVertical) {
+      y = lineModel.y2 - lineLabelYOffsetPx;
+    } else {
+      const fitsAboveLine = lineModel.y - lineLabelYOffsetPx - textHeight > 0;
+      y = fitsAboveLine ? lineModel.y - lineLabelYOffsetPx : lineModel.y + lineLabelYOffsetPx;
+    }
+
+    return { x, y };
   }
 }

@@ -201,3 +201,70 @@ export const horizontal = () => {
 
   return el;
 };
+
+export const labels = () => {
+  const { el } = createChart(randomData(24), {
+    plot: {
+      lines: [
+        {
+          value: 4,
+          color: '#fa2828',
+          width: 2,
+          dashSegments: [10, 2],
+          name: 'Min Hours',
+        },
+        {
+          value: 12,
+          color: '#2828fa',
+          width: 2,
+          dashSegments: [10, 2],
+          name: 'Max Hours',
+        },
+        {
+          value: 22,
+          color: '#28aa28',
+          width: 2,
+          dashSegments: [10, 2],
+          name: 'Too Many Hours',
+        },
+      ],
+    },
+  });
+
+  return el;
+};
+
+export const labelsHorizontal = () => {
+  const { el } = createChart(randomData(24), {
+    plot: {
+      lines: [
+        {
+          value: 50,
+          color: '#fa2828',
+          width: 2,
+          dashSegments: [10, 2],
+          orientation: 'horizontal',
+          name: 'Upper Limit',
+        },
+        {
+          value: 30,
+          color: '#2828fa',
+          width: 2,
+          dashSegments: [10, 2],
+          orientation: 'horizontal',
+          name: 'Lower Limit',
+        },
+        {
+          value: 98,
+          color: '#28aa28',
+          width: 2,
+          dashSegments: [10, 2],
+          orientation: 'horizontal',
+          name: 'Highest Limit',
+        },
+      ],
+    },
+  });
+
+  return el;
+};

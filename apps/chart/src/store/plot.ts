@@ -67,8 +67,8 @@ function makePlotLines(
   isDateType: boolean,
   plotLines: PlotLine[] = [],
   shouldFlip = false
-) {
-  return plotLines.map(({ value, color, orientation, opacity, dashSegments, width }) => {
+): PlotLine[] {
+  return plotLines.map(({ value, color, orientation, opacity, dashSegments, width, name }) => {
     const isVertical = !orientation || orientation === 'vertical';
     let validValue: number | string;
     if (shouldFlip) {
@@ -81,13 +81,18 @@ function makePlotLines(
       value: validValue,
       color: rgba(color, opacity),
       orientation: orientation || 'vertical',
+      name,
       dashSegments,
       width,
     };
   });
 }
 
-function makePlotBands(categories: string[], isDateType: boolean, plotBands: PlotBand[] = []) {
+function makePlotBands(
+  categories: string[],
+  isDateType: boolean,
+  plotBands: PlotBand[] = []
+): PlotBand[] {
   return plotBands.flatMap(
     ({ range, mergeOverlappingRanges = false, color: bgColor, opacity, orientation }) => {
       const color = rgba(bgColor, opacity);
@@ -127,14 +132,14 @@ const plot: StoreModule = {
 
       const shouldFlip = shouldFlipPlotLines(series);
 
-      const lines: PlotLine[] = makePlotLines(
+      const lines = makePlotLines(
         rawCategories,
         !!options?.xAxis?.date,
         lineAreaOptions?.plot?.lines,
         shouldFlip
       );
 
-      const bands: PlotBand[] = makePlotBands(
+      const bands = makePlotBands(
         rawCategories,
         !!options?.xAxis?.date,
         lineAreaOptions?.plot?.bands

@@ -257,6 +257,7 @@ type PlotOrientation = 'horizontal' | 'vertical';
 export type PlotLine = {
   value: PlotXPointType;
   color: string;
+  name?: string;
   width?: number;
   dashSegments?: number[];
   orientation?: PlotOrientation;
