@@ -124,7 +124,7 @@ export function makeAxisTitleTheme(globalFontFamily = 'Arial') {
         color: '#bbbbbb',
     };
 }
-function makeCommonTextTheme(globalFontFamily = 'Arial') {
+export function makeCommonTextTheme(globalFontFamily = 'Arial') {
     return { fontSize: 11, fontFamily: globalFontFamily, fontWeight: 'normal', color: '#333333' };
 }
 export function makeDefaultTheme(series, globalFontFamily = 'Arial') {

@@ -28,7 +28,7 @@ function getValidValue(value, categories, isDateType = false) {
     return value;
 }
 function makePlotLines(categories, isDateType, plotLines = [], shouldFlip = false) {
-    return plotLines.map(({ value, color, orientation, opacity, dashSegments, width }) => {
+    return plotLines.map(({ value, color, orientation, opacity, dashSegments, width, name }) => {
         const isVertical = !orientation || orientation === 'vertical';
         let validValue;
         if (shouldFlip) {
@@ -41,6 +41,7 @@ function makePlotLines(categories, isDateType, plotLines = [], shouldFlip = fals
             value: validValue,
             color: rgba(color, opacity),
             orientation: orientation || 'vertical',
+            name,
             dashSegments,
             width,
         };

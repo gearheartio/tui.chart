@@ -54,5 +54,11 @@ export declare function makeAxisTitleTheme(globalFontFamily?: string): {
     fontWeight: number;
     color: string;
 };
+export declare function makeCommonTextTheme(globalFontFamily?: string): {
+    fontSize: number;
+    fontFamily: string;
+    fontWeight: string;
+    color: string;
+};
 export declare function makeDefaultTheme(series: RawSeries, globalFontFamily?: string): Theme;
 export declare function getDefaultTheme(series: RawSeries, pieSeriesOuterAnchors: CheckAnchorPieSeries | Record<string, CheckAnchorPieSeries>, globalFontFamily?: string, isNestedPieChart?: boolean): Theme;

@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Chart 4th Edition
- * @version 4.4.0 | Tue Jul 27 2021
+ * @version 4.5.0 | Tue Aug 03 2021
  * @author NHN. FE Development Lab <dl_javascript@nhn.com>
  * @license MIT
  */
@@ -14869,7 +14869,6 @@ function makeAxisTitleTheme() {
     color: '#bbbbbb'
   };
 }
-
 function makeCommonTextTheme() {
   var globalFontFamily = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'Arial';
   return {
@@ -14879,7 +14878,6 @@ function makeCommonTextTheme() {
     color: '#333333'
   };
 }
-
 function makeDefaultTheme(series) {
   var globalFontFamily = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'Arial';
   var axisTitleTheme = makeAxisTitleTheme(globalFontFamily);
@@ -19153,7 +19151,8 @@ function makePlotLines(categories, isDateType) {
         orientation = _ref4.orientation,
         opacity = _ref4.opacity,
         dashSegments = _ref4.dashSegments,
-        width = _ref4.width;
+        width = _ref4.width,
+        name = _ref4.name;
     var isVertical = !orientation || orientation === 'vertical';
     var validValue;
 
@@ -19167,6 +19166,7 @@ function makePlotLines(categories, isDateType) {
       value: validValue,
       color: rgba(color, opacity),
       orientation: orientation || 'vertical',
+      name: name,
       dashSegments: dashSegments,
       width: width
     };
@@ -20275,6 +20275,10 @@ function plotElements_defineProperty(obj, key, value) { if (key in obj) { Object
 
 
 
+
+var lineLabelXOffsetPx = 12;
+var lineLabelYOffsetPx = 15;
+
 function getValidIndex(index) {
   var startIndex = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
   return ~~index ? index - startIndex : index;
@@ -20354,7 +20358,8 @@ var PlotElements = /*#__PURE__*/function (_Component) {
 
     plotElements_defineProperty(plotElements_assertThisInitialized(_this), "models", {
       line: [],
-      band: []
+      band: [],
+      label: []
     });
 
     plotElements_defineProperty(plotElements_assertThisInitialized(_this), "startIndex", 0);
@@ -20389,7 +20394,8 @@ var PlotElements = /*#__PURE__*/function (_Component) {
             color = _ref3.color,
             orientation = _ref3.orientation,
             dashSegments = _ref3.dashSegments,
-            width = _ref3.width;
+            width = _ref3.width,
+            name = _ref3.name;
         var vertical = !orientation || orientation === 'vertical';
 
         var _this2$getPlotAxisSiz = _this2.getPlotAxisSize(vertical),
@@ -20408,7 +20414,8 @@ var PlotElements = /*#__PURE__*/function (_Component) {
         return _this2.makeLineModel(vertical, position, {
           color: color,
           dashSegments: dashSegments,
-          lineWidth: width
+          lineWidth: width,
+          name: name
         });
       });
     }
@@ -20570,6 +20577,7 @@ var PlotElements = /*#__PURE__*/function (_Component) {
       var flipLines = shouldFlipPlotLines(series);
       this.models.line = this.renderLines(axes, categories, scale, lines, flipLines);
       this.models.band = this.renderBands(axes, categories, scale, bands, flipLines);
+      this.models.label = this.renderLabelModels(this.models.line);
     }
   }, {
     key: "makeLineModel",
@@ -20577,6 +20585,7 @@ var PlotElements = /*#__PURE__*/function (_Component) {
       var color = _ref9.color,
           _ref9$dashSegments = _ref9.dashSegments,
           dashSegments = _ref9$dashSegments === void 0 ? [] : _ref9$dashSegments,
+          name = _ref9.name,
           _ref9$lineWidth = _ref9.lineWidth,
           lineWidth = _ref9$lineWidth === void 0 ? 1 : _ref9$lineWidth;
       var xPos = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
@@ -20590,6 +20599,7 @@ var PlotElements = /*#__PURE__*/function (_Component) {
         y: y,
         x2: x + width,
         y2: y + height,
+        name: name,
         strokeStyle: color,
         lineWidth: lineWidth,
         dashSegments: dashSegments
@@ -20609,6 +20619,60 @@ var PlotElements = /*#__PURE__*/function (_Component) {
         width: width,
         height: height,
         color: color
+      };
+    }
+  }, {
+    key: "renderLabelModels",
+    value: function renderLabelModels(lineModels) {
+      var _this5 = this;
+
+      var font = makeCommonTextTheme();
+      font.fontWeight = 'bold';
+      var textAlign = 'left';
+      var fontString = getTitleFontString(font);
+      var style = ['default', {
+        textAlign: textAlign,
+        font: getTitleFontString(font),
+        fillStyle: 'black'
+      }];
+      return lineModels.map(function (lineModel) {
+        var _lineModel$name;
+
+        var name = (_lineModel$name = lineModel.name) !== null && _lineModel$name !== void 0 ? _lineModel$name : '';
+        var textHeight = getTextHeight(name, fontString);
+        var textWidth = getTextWidth(name, fontString);
+
+        var _this5$getLabelCoords = _this5.getLabelCoords(lineModel, textHeight, textWidth),
+            x = _this5$getLabelCoords.x,
+            y = _this5$getLabelCoords.y;
+
+        return {
+          type: 'label',
+          text: name,
+          style: style,
+          x: x,
+          y: y
+        };
+      });
+    }
+  }, {
+    key: "getLabelCoords",
+    value: function getLabelCoords(lineModel, textHeight, textWidth) {
+      var isVertical = lineModel.x === lineModel.x2;
+      var fitsHorizontally = lineModel.x + lineLabelXOffsetPx + textWidth < this.rect.width;
+      var x = fitsHorizontally ? lineModel.x + lineLabelXOffsetPx : lineModel.x - lineLabelXOffsetPx - textWidth;
+      var y;
+
+      if (isVertical) {
+        y = lineModel.y2 - lineLabelYOffsetPx;
+      } else {
+        var fitsAboveLine = lineModel.y - lineLabelYOffsetPx - textHeight > 0;
+        y = fitsAboveLine ? lineModel.y - lineLabelYOffsetPx : lineModel.y + lineLabelYOffsetPx;
+      }
+
+      return {
+        x: x,
+        y: y
       };
     }
   }]);
