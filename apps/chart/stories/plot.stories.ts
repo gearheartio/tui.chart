@@ -2,7 +2,7 @@ import LineChart from '@src/charts/lineChart';
 import { LineSeriesData } from '@t/options';
 import { deepMergedCopy } from '@src/helpers/utils';
 import { coordinateData, randomData, datetimeCoordinateData, temperatureData } from './data';
-import { boolean, withKnobs } from '@storybook/addon-knobs';
+import { boolean, text, withKnobs } from '@storybook/addon-knobs';
 import '@src/css/chart.css';
 
 const width = 1000;
@@ -244,7 +244,7 @@ export const labelsHorizontal = () => {
           width: 2,
           dashSegments: [10, 2],
           orientation: 'horizontal',
-          name: 'Upper Limit',
+          name: text('Upper Limit', 'Upper Limit'),
         },
         {
           value: 30,

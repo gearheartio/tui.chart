@@ -157,28 +157,32 @@ export default abstract class Chart<T extends Options> {
 
     this.eventBus.on(
       'needLoop',
-      debounce(() => {
-        let duration = this.getAnimationDuration(options.chart?.animation);
+      debounce(
+        () => {
+          let duration = this.getAnimationDuration(options.chart?.animation);
 
-        if (this.animationControlFlag.resizing) {
-          duration = isUndefined(options.responsive)
-            ? this.getAnimationDuration()
-            : this.getAnimationDuration(options.responsive?.animation);
+          if (this.animationControlFlag.resizing) {
+            duration = isUndefined(options.responsive)
+              ? this.getAnimationDuration()
+              : this.getAnimationDuration(options.responsive?.animation);
 
-          this.animationControlFlag.resizing = false;
-        }
+            this.animationControlFlag.resizing = false;
+          }
 
-        this.eventBus.emit('loopStart');
+          this.eventBus.emit('loopStart');
 
-        this.animator.add({
-          onCompleted: () => {
-            this.eventBus.emit('loopComplete');
-          },
-          chart: this,
-          duration,
-          requester: this,
-        });
-      }, 10)
+          this.animator.add({
+            onCompleted: () => {
+              this.eventBus.emit('loopComplete');
+            },
+            chart: this,
+            duration,
+            requester: this,
+          });
+        },
+        10,
+        true
+      )
     );
 
     this.eventBus.on('needSubLoop', (opts) => {

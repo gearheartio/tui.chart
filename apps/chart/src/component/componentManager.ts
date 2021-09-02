@@ -4,7 +4,6 @@ import Store from '../store/store';
 import EventEmitter from '../eventEmitter';
 
 import Component from '@src/component/component';
-import { debounce } from '@src/helpers/utils';
 
 type ComponentConstructor<T> = new ({
   store,
@@ -36,17 +35,11 @@ export default class ComponentManager<T> {
       component.initialize(initialParam);
     }
 
-    let proc = (...args: any[]) => {
+    this.store.observe((...args) => {
       component.render(args[0], args[1]); // rest쓰면 에러남
       component.sync();
       this.eventBus.emit('needLoop');
-    };
-
-    this.store.observe((...args) => {
-      proc(...args);
     });
-
-    proc = debounce(proc);
 
     this.components.push(component);
   }

@@ -129,6 +129,8 @@ declare class BaseChart {
 
   public on(eventName: CustomEventType, handler: EventListener): void;
 
+  public off(eventName: CustomEventType): void;
+
   public destroy(): void;
 
   public resize(size: Partial<Size>): void;
