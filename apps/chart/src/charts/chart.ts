@@ -525,6 +525,14 @@ export default abstract class Chart<T extends Options> {
     this.eventBus.on(eventName, handler);
   };
 
+  /**
+   * Unregister of all user custom events.
+   * @param {string} eventName - Event name. 'clickLegendLabel', 'clickLegendCheckbox', 'selectSeries', 'unselectSeries', 'hoverSeries', 'unhoverSeries', 'zoom', 'resetZoom' is available.
+   */
+  public off(eventName: CustomEventType): void {
+    this.eventBus.off(eventName);
+  }
+
   public abstract setData(data: DataInput): void;
 
   /**

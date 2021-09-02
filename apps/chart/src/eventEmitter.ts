@@ -28,6 +28,13 @@ export default class EventEmitter {
     this.handlers[type].push(handler);
   }
 
+  off(type: EventType) {
+    if (!this.handlers[type]) {
+      return;
+    }
+    this.handlers[type] = [];
+  }
+
   emit(type: EventType, ...args) {
     this.handlers[type]?.forEach((handler) => handler(...args));
   }
