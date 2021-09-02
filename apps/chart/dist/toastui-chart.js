@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Chart 4th Edition
- * @version 4.5.0 | Tue Aug 03 2021
+ * @version 4.5.0 | Thu Sep 02 2021
  * @author NHN. FE Development Lab <dl_javascript@nhn.com>
  * @license MIT
  */
@@ -7422,23 +7422,31 @@ function pickPropertyWithMakeup(target, args) {
   }
 
   return target;
-}
-function debounce(fn) {
-  var delay = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-  var timer;
+} // Returns a function, that, as long as it continues to be invoked, will not
+// be triggered. The function will be called after it stops being called for
+// N milliseconds. If `immediate` is passed, trigger the function on the
+// leading edge, instead of the trailing.
 
-  function debounced() {
+function debounce(func) {
+  var wait = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+  var immediate = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+  var timeout;
+  return function () {
     for (var _len3 = arguments.length, args = new Array(_len3), _key4 = 0; _key4 < _len3; _key4++) {
       args[_key4] = arguments[_key4];
     }
 
-    window.clearTimeout(timer);
-    timer = window.setTimeout(function () {
-      fn.apply(void 0, args);
-    }, delay);
-  }
+    var later = function later() {
+      // eslint-disable-next-line no-undefined
+      timeout = undefined;
+      if (!immediate) func(args);
+    };
 
-  return debounced;
+    var callNow = immediate && !timeout;
+    window.clearTimeout(timeout);
+    timeout = window.setTimeout(later, wait);
+    if (callNow) func(args);
+  };
 }
 function merge(target) {
   target = target || {};
@@ -16580,6 +16588,15 @@ var EventEmitter = /*#__PURE__*/function () {
       this.handlers[type].push(handler);
     }
   }, {
+    key: "off",
+    value: function off(type) {
+      if (!this.handlers[type]) {
+        return;
+      }
+
+      this.handlers[type] = [];
+    }
+  }, {
     key: "emit",
     value: function emit(type) {
       var _this$handlers$type;
@@ -16609,8 +16626,6 @@ function componentManager_defineProperties(target, props) { for (var i = 0; i < 
 function componentManager_createClass(Constructor, protoProps, staticProps) { if (protoProps) componentManager_defineProperties(Constructor.prototype, protoProps); if (staticProps) componentManager_defineProperties(Constructor, staticProps); return Constructor; }
 
 function componentManager_defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-
 
 var ComponentManager = /*#__PURE__*/function () {
   function ComponentManager(_ref) {
@@ -16643,18 +16658,13 @@ var ComponentManager = /*#__PURE__*/function () {
         component.initialize(initialParam);
       }
 
-      var proc = function proc() {
+      this.store.observe(function () {
         component.render(arguments.length <= 0 ? undefined : arguments[0], arguments.length <= 1 ? undefined : arguments[1]); // rest쓰면 에러남
 
         component.sync();
 
         _this.eventBus.emit('needLoop');
-      };
-
-      this.store.observe(function () {
-        proc.apply(void 0, arguments);
       });
-      proc = debounce(proc);
       this.components.push(component);
     }
   }, {
@@ -17598,7 +17608,7 @@ var Chart = /*#__PURE__*/function () {
         duration: duration,
         requester: _this
       });
-    }, 10));
+    }, 10, true));
     this.eventBus.on('needSubLoop', function (opts) {
       _this.animator.add(chart_objectSpread(chart_objectSpread({}, opts), {}, {
         chart: _this
@@ -17845,6 +17855,16 @@ var Chart = /*#__PURE__*/function () {
     key: "initUpdate",
     value: function initUpdate(delta) {
       this.componentManager.invoke('initUpdate', delta);
+    }
+  }, {
+    key: "off",
+    value:
+    /**
+     * Unregister of all user custom events.
+     * @param {string} eventName - Event name. 'clickLegendLabel', 'clickLegendCheckbox', 'selectSeries', 'unselectSeries', 'hoverSeries', 'unhoverSeries', 'zoom', 'resetZoom' is available.
+     */
+    function off(eventName) {
+      this.eventBus.off(eventName);
     }
   }, {
     key: "isSelectableSeries",

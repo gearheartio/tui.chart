@@ -123,15 +123,25 @@ export function pickPropertyWithMakeup(target, args) {
     }
     return target;
 }
-export function debounce(fn, delay = 0) {
-    let timer;
-    function debounced(...args) {
-        window.clearTimeout(timer);
-        timer = window.setTimeout(() => {
-            fn(...args);
-        }, delay);
-    }
-    return debounced;
+// Returns a function, that, as long as it continues to be invoked, will not
+// be triggered. The function will be called after it stops being called for
+// N milliseconds. If `immediate` is passed, trigger the function on the
+// leading edge, instead of the trailing.
+export function debounce(func, wait = 0, immediate = false) {
+    let timeout;
+    return (...args) => {
+        const later = () => {
+            // eslint-disable-next-line no-undefined
+            timeout = undefined;
+            if (!immediate)
+                func(args);
+        };
+        const callNow = immediate && !timeout;
+        window.clearTimeout(timeout);
+        timeout = window.setTimeout(later, wait);
+        if (callNow)
+            func(args);
+    };
 }
 export function merge(target, ...args) {
     target = target || {};

@@ -275,7 +275,7 @@ export default class Chart {
                 duration,
                 requester: this,
             });
-        }, 10));
+        }, 10, true));
         this.eventBus.on('needSubLoop', (opts) => {
             this.animator.add(Object.assign(Object.assign({}, opts), { chart: this }));
         });
@@ -455,6 +455,13 @@ export default class Chart {
     }
     initUpdate(delta) {
         this.componentManager.invoke('initUpdate', delta);
+    }
+    /**
+     * Unregister of all user custom events.
+     * @param {string} eventName - Event name. 'clickLegendLabel', 'clickLegendCheckbox', 'selectSeries', 'unselectSeries', 'hoverSeries', 'unhoverSeries', 'zoom', 'resetZoom' is available.
+     */
+    off(eventName) {
+        this.eventBus.off(eventName);
     }
     isSelectableSeries() {
         var _a;

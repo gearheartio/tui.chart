@@ -79,6 +79,11 @@ export default abstract class Chart<T extends Options> {
      * @api
      */
     on: (eventName: CustomEventType, handler: EventListener) => void;
+    /**
+     * Unregister of all user custom events.
+     * @param {string} eventName - Event name. 'clickLegendLabel', 'clickLegendCheckbox', 'selectSeries', 'unselectSeries', 'hoverSeries', 'unhoverSeries', 'zoom', 'resetZoom' is available.
+     */
+    off(eventName: CustomEventType): void;
     abstract setData(data: DataInput): void;
     /**
      * Destroys the instance.

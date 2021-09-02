@@ -18,7 +18,7 @@ export declare function pick<T extends object, K extends keyof T>(obj: T, ...pro
 export declare function omit<T extends object, K extends keyof T>(obj: T, ...propNames: K[]): Pick<T, Exclude<keyof T, K>>;
 export declare function pickProperty(target: Record<string, any>, keys: string[]): Record<string, any> | null;
 export declare function pickPropertyWithMakeup(target: Record<string, any>, args: string[]): Record<string, any>;
-export declare function debounce(fn: Function, delay?: number): (...args: any[]) => void;
+export declare function debounce(func: Function, wait?: number, immediate?: boolean): (...args: any[]) => void;
 export declare function merge(target: Record<string, any>, ...args: Record<string, any>[]): Record<string, any>;
 export declare function throttle(fn: Function, interval?: number): {
     (...args: any[]): void;

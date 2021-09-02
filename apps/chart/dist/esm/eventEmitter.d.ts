@@ -3,6 +3,7 @@ declare type EventType = 'needSubLoop' | 'needDraw' | 'needLoop' | 'loopStart' |
 export default class EventEmitter {
     handlers: EventListener[];
     on(type: EventType, handler: EventListener): void;
+    off(type: EventType): void;
     emit(type: EventType, ...args: any[]): void;
 }
 export {};
