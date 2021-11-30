@@ -165,8 +165,12 @@ function calculateLegendHeight(params: LegendSizeParams) {
 function getSpectrumLegendWidth(
   legendWidths: number[],
   chartWidth: number,
-  verticalAlign: boolean
-) {
+  verticalAlign: boolean,
+  visible: boolean
+): number {
+  if (!visible) {
+    return 0;
+  }
   if (verticalAlign) {
     const labelAreaWidth = sum(legendWidths);
 
@@ -478,7 +482,7 @@ const legend: StoreModule = {
       const legendWidths = legendData.map(({ width }) => width);
       const itemHeight = getLegendItemHeight(theme.legend.label!.fontSize!);
 
-      const width = getSpectrumLegendWidth(legendWidths, chart.width, verticalAlign);
+      const width = getSpectrumLegendWidth(legendWidths, chart.width, verticalAlign, visible);
       const height = getSpectrumLegendHeight(itemHeight, chart.height, verticalAlign);
 
       extend(state.legend, { visible, align, width, height });

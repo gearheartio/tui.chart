@@ -32,7 +32,7 @@ import { getYAxisOption } from '@src/helpers/axes';
 import { AxisTheme, CircularAxisTheme } from '@t/theme';
 
 export const padding = { X: 10, Y: 15 };
-export const X_AXIS_HEIGHT = 20;
+const X_AXIS_HEIGHT = 10;
 const Y_AXIS_MIN_WIDTH = 40;
 
 export function isVerticalAlign(align?: Align) {
@@ -312,7 +312,7 @@ function getLegendRect(legendRectParams: LegendRectParams) {
       y = yAxis.y + yAxis.height + (hasXYAxis ? xAxis.height + xAxisTitleHeight : padding.Y);
     }
   } else if (align === 'left') {
-    x = padding.X;
+    x = 0;
   }
 
   return { width: legendWidth, height: legendHeight, x, y };
@@ -336,7 +336,7 @@ function getPlotRect(xAxis: Rect, yAxis: Rect, size: OptionalSize) {
 }
 
 function getTitleRect(chartSize: Size, exportMenu: Rect, visible: boolean, titleHeight: number) {
-  const point = { x: padding.X, y: padding.Y };
+  const point = { x: 0, y: 0 };
   const marginBottom = 5;
   const width = visible ? chartSize.width - exportMenu.width : 0;
   const height = visible
@@ -410,8 +410,8 @@ function getXAxisTitleRect(visible: boolean, xAxis: Rect, xAxisTitleHeight: numb
 
 function getExportMenuRect(chartSize: Size, visible: boolean) {
   const marginY = 5;
-  const x = visible ? padding.X + chartSize.width - BUTTON_RECT_SIZE : padding.X + chartSize.width;
-  const y = padding.Y;
+  const x = visible ? chartSize.width - BUTTON_RECT_SIZE : padding.X + chartSize.width;
+  const y = 0;
   const height = visible ? BUTTON_RECT_SIZE + marginY : 0;
   const width = visible ? BUTTON_RECT_SIZE : 0;
 
@@ -604,8 +604,8 @@ const layout: StoreModule = {
       } = state;
       const { width, height } = chart;
       const chartSize = {
-        height: height - padding.Y * 2,
-        width: width - padding.X * 2,
+        height,
+        width,
       };
       const hasCenterYAxis = series.bar ? isCenterYAxis(options as ChartOptionsUsingYAxis) : false;
       const hasXYAxis = hasXYAxes(series);
