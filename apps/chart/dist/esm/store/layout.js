@@ -6,7 +6,7 @@ import { TICK_SIZE } from "../brushes/axis";
 import { SPECTRUM_LEGEND_LABEL_HEIGHT, spectrumLegendBar, spectrumLegendTooltip, } from "../brushes/spectrumLegend";
 import { getYAxisOption } from "../helpers/axes";
 export const padding = { X: 10, Y: 15 };
-export const X_AXIS_HEIGHT = 20;
+const X_AXIS_HEIGHT = 10;
 const Y_AXIS_MIN_WIDTH = 40;
 export function isVerticalAlign(align) {
     return align === 'top' || align === 'bottom';
@@ -169,7 +169,7 @@ function getLegendRect(legendRectParams) {
         }
     }
     else if (align === 'left') {
-        x = padding.X;
+        x = 0;
     }
     return { width: legendWidth, height: legendHeight, x, y };
 }
@@ -185,7 +185,7 @@ function getPlotRect(xAxis, yAxis, size) {
     return Object.assign({ x: xAxis.x, y: yAxis.y }, getValidRectSize(size, xAxis.width, yAxis.height));
 }
 function getTitleRect(chartSize, exportMenu, visible, titleHeight) {
-    const point = { x: padding.X, y: padding.Y };
+    const point = { x: 0, y: 0 };
     const marginBottom = 5;
     const width = visible ? chartSize.width - exportMenu.width : 0;
     const height = visible
@@ -233,8 +233,8 @@ function getXAxisTitleRect(visible, xAxis, xAxisTitleHeight) {
 }
 function getExportMenuRect(chartSize, visible) {
     const marginY = 5;
-    const x = visible ? padding.X + chartSize.width - BUTTON_RECT_SIZE : padding.X + chartSize.width;
-    const y = padding.Y;
+    const x = visible ? chartSize.width - BUTTON_RECT_SIZE : padding.X + chartSize.width;
+    const y = 0;
     const height = visible ? BUTTON_RECT_SIZE + marginY : 0;
     const width = visible ? BUTTON_RECT_SIZE : 0;
     return { x, y, height, width };
@@ -373,8 +373,8 @@ const layout = {
             const { legend: legendState, theme, circleLegend: circleLegendState, series, options, chart, axes, radialAxes, } = state;
             const { width, height } = chart;
             const chartSize = {
-                height: height - padding.Y * 2,
-                width: width - padding.X * 2,
+                height,
+                width,
             };
             const hasCenterYAxis = series.bar ? isCenterYAxis(options) : false;
             const hasXYAxis = hasXYAxes(series);

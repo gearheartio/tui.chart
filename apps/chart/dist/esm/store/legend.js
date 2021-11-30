@@ -80,7 +80,10 @@ function calculateLegendHeight(params) {
     }
     return { legendHeight, isOverflow };
 }
-function getSpectrumLegendWidth(legendWidths, chartWidth, verticalAlign) {
+function getSpectrumLegendWidth(legendWidths, chartWidth, verticalAlign, visible) {
+    if (!visible) {
+        return 0;
+    }
     if (verticalAlign) {
         const labelAreaWidth = sum(legendWidths);
         return Math.max(chartWidth / 4, labelAreaWidth);
@@ -313,7 +316,7 @@ const legend = {
             const verticalAlign = isVerticalAlign(align);
             const legendWidths = legendData.map(({ width }) => width);
             const itemHeight = getLegendItemHeight(theme.legend.label.fontSize);
-            const width = getSpectrumLegendWidth(legendWidths, chart.width, verticalAlign);
+            const width = getSpectrumLegendWidth(legendWidths, chart.width, verticalAlign, visible);
             const height = getSpectrumLegendHeight(itemHeight, chart.height, verticalAlign);
             extend(state.legend, { visible, align, width, height });
         },

@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Chart 4th Edition
- * @version 4.5.1 | Thu Sep 02 2021
+ * @version 4.5.2 | Tue Nov 30 2021
  * @author NHN. FE Development Lab <dl_javascript@nhn.com>
  * @license MIT
  */
@@ -13041,7 +13041,7 @@ var padding = {
   X: 10,
   Y: 15
 };
-var X_AXIS_HEIGHT = 20;
+var X_AXIS_HEIGHT = 10;
 var Y_AXIS_MIN_WIDTH = 40;
 function isVerticalAlign(align) {
   return align === 'top' || align === 'bottom';
@@ -13285,7 +13285,7 @@ function getLegendRect(legendRectParams) {
       y = yAxis.y + yAxis.height + (hasXYAxis ? xAxis.height + xAxisTitleHeight : padding.Y);
     }
   } else if (align === 'left') {
-    x = padding.X;
+    x = 0;
   }
 
   return {
@@ -13314,8 +13314,8 @@ function getPlotRect(xAxis, yAxis, size) {
 
 function getTitleRect(chartSize, exportMenu, visible, titleHeight) {
   var point = {
-    x: padding.X,
-    y: padding.Y
+    x: 0,
+    y: 0
   };
   var marginBottom = 5;
   var width = visible ? chartSize.width - exportMenu.width : 0;
@@ -13387,8 +13387,8 @@ function getXAxisTitleRect(visible, xAxis, xAxisTitleHeight) {
 
 function getExportMenuRect(chartSize, visible) {
   var marginY = 5;
-  var x = visible ? padding.X + chartSize.width - BUTTON_RECT_SIZE : padding.X + chartSize.width;
-  var y = padding.Y;
+  var x = visible ? chartSize.width - BUTTON_RECT_SIZE : padding.X + chartSize.width;
+  var y = 0;
   var height = visible ? BUTTON_RECT_SIZE + marginY : 0;
   var width = visible ? BUTTON_RECT_SIZE : 0;
   return {
@@ -13581,8 +13581,8 @@ var layout = {
       var width = chart.width,
           height = chart.height;
       var chartSize = {
-        height: height - padding.Y * 2,
-        width: width - padding.X * 2
+        height: height,
+        width: width
       };
       var hasCenterYAxis = series.bar ? isCenterYAxis(options) : false;
       var hasXYAxis = hasXYAxes(series);
@@ -15787,7 +15787,11 @@ function calculateLegendHeight(params) {
   };
 }
 
-function getSpectrumLegendWidth(legendWidths, chartWidth, verticalAlign) {
+function getSpectrumLegendWidth(legendWidths, chartWidth, verticalAlign, visible) {
+  if (!visible) {
+    return 0;
+  }
+
   if (verticalAlign) {
     var labelAreaWidth = sum(legendWidths);
     return Math.max(chartWidth / 4, labelAreaWidth);
@@ -16108,7 +16112,7 @@ var legend_legend = {
         return width;
       });
       var itemHeight = getLegendItemHeight(theme.legend.label.fontSize);
-      var width = getSpectrumLegendWidth(legendWidths, chart.width, verticalAlign);
+      var width = getSpectrumLegendWidth(legendWidths, chart.width, verticalAlign, visible);
       var height = getSpectrumLegendHeight(itemHeight, chart.height, verticalAlign);
       store_extend(state.legend, {
         visible: visible,
