@@ -67,7 +67,8 @@ export function getAutoAdjustingInterval(count, axisWidth, categories) {
 }
 export function isLabelAxisOnYAxis({ series, options, categories, }) {
     var _a, _b;
-    return (!!series.bar ||
+    return (!!series.heatmap ||
+        !!series.bar ||
         !!series.radialBar ||
         (!!series.gauge && Array.isArray(categories) && !categories.length) ||
         (!!series.bullet && !((_b = (_a = options) === null || _a === void 0 ? void 0 : _a.series) === null || _b === void 0 ? void 0 : _b.vertical)));
@@ -247,12 +248,14 @@ export function makeRotationData(maxLabelWidth, maxLabelHeight, distance, rotata
             needRotateLabel: false,
             radian: 0,
             rotationHeight: maxLabelHeight,
+            rotationWidth: maxLabelWidth,
         };
     }
     return {
         needRotateLabel: degree > 0,
         radian: calculateDegreeToRadian(degree, 0),
         rotationHeight: calculateRotatedHeight(degree, maxLabelWidth, maxLabelHeight),
+        rotationWidth: calculateRotatedWidth(degree, maxLabelWidth, maxLabelHeight),
     };
 }
 export function getMaxLabelSize(labels, xMargin, font = DEFAULT_LABEL_TEXT) {
@@ -260,6 +263,22 @@ export function getMaxLabelSize(labels, xMargin, font = DEFAULT_LABEL_TEXT) {
     return {
         maxLabelWidth: getTextWidth(maxLengthLabel, font) + xMargin,
         maxLabelHeight: getTextHeight(maxLengthLabel, font),
+    };
+}
+export function getFirstLabelSize(labels, xMargin, font = DEFAULT_LABEL_TEXT) {
+    var _a;
+    const maxLengthLabel = (_a = labels[0], (_a !== null && _a !== void 0 ? _a : ''));
+    return {
+        firstLabelWidth: getTextWidth(maxLengthLabel, font) + xMargin,
+        firstLabelHeight: getTextHeight(maxLengthLabel, font),
+    };
+}
+export function getLastLabelSize(labels, xMargin, font = DEFAULT_LABEL_TEXT) {
+    var _a;
+    const maxLengthLabel = (_a = labels[labels.length - 1], (_a !== null && _a !== void 0 ? _a : ''));
+    return {
+        lastLabelWidth: getTextWidth(maxLengthLabel, font) + xMargin,
+        lastLabelHeight: getTextHeight(maxLengthLabel, font),
     };
 }
 export function getLabelXMargin(axisName, options) {

@@ -39,6 +39,10 @@ function getHeatmapAxisData(stateProp, axisType) {
         title: makeTitleOption((_g = options[axisType]) === null || _g === void 0 ? void 0 : _g.title),
         maxLabelWidth,
         maxLabelHeight,
+        firstLabelWidth: 0,
+        firstLabelHeight: 0,
+        lastLabelWidth: 0,
+        lastLabelHeight: 0,
     };
     if (axisType === AxisType.X) {
         const labelMargin = (_k = (_j = (_h = options.xAxis) === null || _h === void 0 ? void 0 : _h.label) === null || _j === void 0 ? void 0 : _j.margin, (_k !== null && _k !== void 0 ? _k : 0));
@@ -46,7 +50,8 @@ function getHeatmapAxisData(stateProp, axisType) {
         const distance = axisSize / viewLabels.length;
         const rotationData = makeRotationData(maxLabelWidth, maxLabelHeight, distance, getRotatableOption(options));
         const { needRotateLabel, rotationHeight } = rotationData;
-        const maxHeight = (needRotateLabel ? rotationHeight : maxLabelHeight) + offsetY;
+        const labelHeight = needRotateLabel ? rotationHeight : maxLabelHeight / 2;
+        const maxHeight = labelHeight + offsetY;
         return Object.assign(Object.assign(Object.assign({}, axisData), rotationData), { maxHeight,
             offsetY });
     }

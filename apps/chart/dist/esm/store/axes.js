@@ -1,4 +1,4 @@
-import { getAxisFormatter, getAxisName, getAxisTheme, getInitAxisIntervalData, getLabelsAppliedFormatter, getLabelXMargin, getMaxLabelSize, getRotatableOption, getSizeKey, getViewAxisLabels, getYAxisOption, hasAxesLayoutChanged, hasBoxTypeSeries, isDateType, isLabelAxisOnYAxis, isPointOnColumn, makeRotationData, makeTitleOption, } from "../helpers/axes";
+import { getAxisFormatter, getAxisName, getAxisTheme, getFirstLabelSize, getInitAxisIntervalData, getLabelsAppliedFormatter, getLabelXMargin, getLastLabelSize, getMaxLabelSize, getRotatableOption, getSizeKey, getViewAxisLabels, getYAxisOption, hasAxesLayoutChanged, hasBoxTypeSeries, isDateType, isLabelAxisOnYAxis, isPointOnColumn, makeRotationData, makeTitleOption, } from "../helpers/axes";
 import { getAxisLabelAnchorPoint, makeLabelsFromLimit } from "../helpers/calculator";
 import { deepMergedCopy, hasNegativeOnly, isNumber, pickProperty } from "../helpers/utils";
 import { isCoordinateSeries } from "../helpers/coordinate";
@@ -52,14 +52,14 @@ export function getLabelAxisData(stateProp) {
         tickCount,
         scale }, initialAxisData), axisSize);
     const axisLabelMargin = getLabelXMargin(axisName, options);
-    return Object.assign(Object.assign({ labels,
+    return Object.assign(Object.assign(Object.assign(Object.assign({ labels,
         viewLabels,
         pointOnColumn,
         labelDistance,
         tickDistance,
         tickCount,
         labelRange,
-        rectResponderCount, isLabelAxis: true }, initialAxisData), getMaxLabelSize(labels, axisLabelMargin, getTitleFontString(theme.label)));
+        rectResponderCount, isLabelAxis: true }, initialAxisData), getMaxLabelSize(labels, axisLabelMargin, getTitleFontString(theme.label))), getFirstLabelSize(labels, axisLabelMargin, getTitleFontString(theme.label))), getLastLabelSize(labels, axisLabelMargin, getTitleFontString(theme.label)));
 }
 function getValueAxisData(stateProp) {
     var _a;
@@ -81,10 +81,10 @@ function getValueAxisData(stateProp) {
         tickDistance,
         tickCount }, initialAxisData), size);
     const axisLabelMargin = getLabelXMargin(axisName, options);
-    const axisData = Object.assign(Object.assign({ labels,
+    const axisData = Object.assign(Object.assign(Object.assign(Object.assign({ labels,
         viewLabels,
         pointOnColumn, isLabelAxis: false, tickCount,
-        tickDistance }, initialAxisData), getMaxLabelSize(labels, axisLabelMargin, getTitleFontString(theme.label)));
+        tickDistance }, initialAxisData), getMaxLabelSize(labels, axisLabelMargin, getTitleFontString(theme.label))), getFirstLabelSize(labels, axisLabelMargin, getTitleFontString(theme.label))), getLastLabelSize(labels, axisLabelMargin, getTitleFontString(theme.label)));
     if (isNumber(zeroPosition)) {
         axisData.zeroPosition = zeroPosition;
     }
@@ -150,15 +150,20 @@ function getSecondaryYAxisData({ state, labelOnYAxis, valueAxisSize, labelAxisSi
         });
 }
 function makeXAxisData({ axisData, axisSize, centerYAxis, rotatable, labelMargin = 0 }) {
-    const { viewLabels, pointOnColumn, maxLabelWidth, maxLabelHeight } = axisData;
+    const { viewLabels, pointOnColumn, maxLabelWidth, maxLabelHeight, lastLabelWidth } = axisData;
     const offsetY = getAxisLabelAnchorPoint(maxLabelHeight) + labelMargin;
     const size = centerYAxis ? centerYAxis.xAxisHalfSize : axisSize;
     const distance = size / (viewLabels.length - (pointOnColumn ? 0 : 1));
     const rotationData = makeRotationData(maxLabelWidth, maxLabelHeight, distance, rotatable);
-    const { needRotateLabel, rotationHeight } = rotationData;
-    const maxHeight = (needRotateLabel ? rotationHeight : maxLabelHeight) + offsetY;
+    const { needRotateLabel, rotationHeight, rotationWidth } = rotationData;
+    const labelHeight = needRotateLabel ? rotationHeight : maxLabelHeight / 2;
+    const maxHeight = labelHeight + offsetY;
+    const extraLabelWidth = needRotateLabel
+        ? (rotationWidth * lastLabelWidth) / maxLabelWidth
+        : lastLabelWidth / 2;
     return Object.assign(Object.assign(Object.assign({}, axisData), rotationData), { maxHeight,
-        offsetY });
+        offsetY,
+        extraLabelWidth });
 }
 function getAxisInfo(labelOnYAxis, plot, series) {
     const { valueAxisName, labelAxisName } = getAxisName(labelOnYAxis, series);

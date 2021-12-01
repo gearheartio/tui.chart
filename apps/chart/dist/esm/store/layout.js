@@ -4,9 +4,10 @@ import { isCenterYAxis } from "./axes";
 import { BUTTON_RECT_SIZE } from "../component/exportMenu";
 import { TICK_SIZE } from "../brushes/axis";
 import { SPECTRUM_LEGEND_LABEL_HEIGHT, spectrumLegendBar, spectrumLegendTooltip, } from "../brushes/spectrumLegend";
-import { getYAxisOption } from "../helpers/axes";
+import { getYAxisOption, isLabelAxisOnYAxis } from "../helpers/axes";
+const chartPadding = { X: 5, Y: 5 };
 export const padding = { X: 10, Y: 15 };
-const X_AXIS_HEIGHT = 10;
+const X_AXIS_HEIGHT = 20;
 const Y_AXIS_MIN_WIDTH = 40;
 export function isVerticalAlign(align) {
     return align === 'top' || align === 'bottom';
@@ -47,8 +48,9 @@ function getYAxisXPoint(yAxisRectParam) {
     }
     return x;
 }
-function getYAxisYPoint({ yAxisTitle }) {
-    return yAxisTitle.y + yAxisTitle.height;
+function getYAxisYPoint({ yAxisTitle, firstLabelHeight, labelOnYAxis }) {
+    const extraLabelHeight = labelOnYAxis ? 0 : firstLabelHeight / 2;
+    return yAxisTitle.y + yAxisTitle.height + extraLabelHeight;
 }
 function getDefaultYAxisWidth({ maxLabelWidth, size, isRightSide }) {
     var _a, _b, _c;
@@ -65,13 +67,13 @@ function getYAxisWidth(yAxisRectParam) {
     }
     return yAxisWidth;
 }
-function getYAxisHeight({ chartSize, legend, yAxisTitle, hasXYAxis, size, xAxisTitleHeight, }) {
+function getYAxisHeight({ chartSize, legend, yAxisTitle, hasXYAxis, size, lastLabelHeight, xAxisTitleHeight, }) {
     var _a, _b, _c, _d;
     const { height } = chartSize;
     const { align, height: legendHeight } = legend;
     const xAxisHeight = getDefaultXAxisHeight(size);
     const y = yAxisTitle.y + yAxisTitle.height;
-    let yAxisHeight = height - y - xAxisHeight - xAxisTitleHeight;
+    let yAxisHeight = height - y - xAxisHeight - xAxisTitleHeight + lastLabelHeight / 2;
     if (!hasXYAxis) {
         yAxisHeight = height - y;
     }
@@ -100,7 +102,7 @@ function getYAxisRect(yAxisRectParam) {
         y }, getValidRectSize(isRightSide ? (_a = size) === null || _a === void 0 ? void 0 : _a.secondaryYAxis : (_b = size) === null || _b === void 0 ? void 0 : _b.yAxis, yAxisWidth, yAxisHeight));
 }
 function getXAxisWidth({ chartSize, yAxis, hasCenterYAxis, legend, circleLegend, secondaryYAxis, xAxisData, }) {
-    var _a;
+    var _a, _b;
     const { width } = chartSize;
     const { align, width: legendWidth } = legend;
     const legendVerticalAlign = isVerticalAlign(align);
@@ -121,9 +123,8 @@ function getXAxisWidth({ chartSize, yAxis, hasCenterYAxis, legend, circleLegend,
     if (secondaryYAxis.width) {
         xAxisWidth -= secondaryYAxis.width;
     }
-    if ((_a = xAxisData) === null || _a === void 0 ? void 0 : _a.maxLabelWidth) {
-        // subtract half of the maximum label length to secure margin size
-        xAxisWidth -= xAxisData.maxLabelWidth * 0.5;
+    if ((_a = xAxisData) === null || _a === void 0 ? void 0 : _a.extraLabelWidth) {
+        xAxisWidth -= (_b = xAxisData) === null || _b === void 0 ? void 0 : _b.extraLabelWidth;
     }
     return xAxisWidth;
 }
@@ -169,7 +170,7 @@ function getLegendRect(legendRectParams) {
         }
     }
     else if (align === 'left') {
-        x = 0;
+        x = chartPadding.X;
     }
     return { width: legendWidth, height: legendHeight, x, y };
 }
@@ -185,7 +186,7 @@ function getPlotRect(xAxis, yAxis, size) {
     return Object.assign({ x: xAxis.x, y: yAxis.y }, getValidRectSize(size, xAxis.width, yAxis.height));
 }
 function getTitleRect(chartSize, exportMenu, visible, titleHeight) {
-    const point = { x: 0, y: 0 };
+    const point = { x: chartPadding.X, y: chartPadding.Y };
     const marginBottom = 5;
     const width = visible ? chartSize.width - exportMenu.width : 0;
     const height = visible
@@ -226,22 +227,25 @@ function getYAxisTitleRect({ chartSize, visible, title, legend: { align: legendA
     return Object.assign({ height, width }, point);
 }
 function getXAxisTitleRect(visible, xAxis, xAxisTitleHeight) {
-    const point = { x: xAxis.x, y: xAxis.y + xAxis.height };
-    const height = visible ? xAxisTitleHeight : 0;
+    const marginTop = 5;
+    const point = { x: xAxis.x, y: xAxis.y + xAxis.height + marginTop };
+    const height = visible ? xAxisTitleHeight + marginTop : 0;
     const width = visible ? xAxis.width : 0;
     return Object.assign({ height, width }, point);
 }
 function getExportMenuRect(chartSize, visible) {
     const marginY = 5;
-    const x = visible ? chartSize.width - BUTTON_RECT_SIZE : padding.X + chartSize.width;
-    const y = 0;
+    const x = visible
+        ? chartPadding.X + chartSize.width - BUTTON_RECT_SIZE
+        : chartPadding.X + chartSize.width;
+    const y = chartPadding.Y;
     const height = visible ? BUTTON_RECT_SIZE + marginY : 0;
     const width = visible ? BUTTON_RECT_SIZE : 0;
     return { x, y, height, width };
 }
 function getResetButtonRect(exportMenu, useResetButton) {
     const marginY = 5;
-    const x = useResetButton ? exportMenu.x - BUTTON_RECT_SIZE - padding.X : 0;
+    const x = useResetButton ? exportMenu.x - BUTTON_RECT_SIZE - chartPadding.X : 0;
     const y = useResetButton ? exportMenu.y : 0;
     const height = useResetButton ? BUTTON_RECT_SIZE + marginY : 0;
     const width = useResetButton ? BUTTON_RECT_SIZE : 0;
@@ -369,12 +373,14 @@ const layout = {
     }),
     action: {
         setLayout({ state }) {
-            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s;
+            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11;
             const { legend: legendState, theme, circleLegend: circleLegendState, series, options, chart, axes, radialAxes, } = state;
             const { width, height } = chart;
+            const labelOnYAxis = isLabelAxisOnYAxis({ series, options });
+            const yAxisPadding = labelOnYAxis ? 0 : (_c = (_b = (_a = axes) === null || _a === void 0 ? void 0 : _a.yAxis) === null || _b === void 0 ? void 0 : _b.firstLabelHeight, (_c !== null && _c !== void 0 ? _c : 0)) / 2;
             const chartSize = {
-                height,
-                width,
+                height: height - yAxisPadding - chartPadding.Y * 2,
+                width: width - chartPadding.X * 2,
             };
             const hasCenterYAxis = series.bar ? isCenterYAxis(options) : false;
             const hasXYAxis = hasXYAxes(series);
@@ -382,15 +388,16 @@ const layout = {
             const { yAxis: yAxisOption, secondaryYAxis: secondaryYAxisOption } = getYAxisOptions(options, hasXYAxis);
             const visibleSecondaryYAxis = !!secondaryYAxisOption;
             const titleHeight = theme.title.fontSize;
-            const yAxisTitleHeight = (_d = getAxisTitleHeight(theme.yAxis, (_c = (_b = (_a = axes) === null || _a === void 0 ? void 0 : _a.yAxis) === null || _b === void 0 ? void 0 : _b.title) === null || _c === void 0 ? void 0 : _c.offsetY), (_d !== null && _d !== void 0 ? _d : 0));
-            const xAxisTitleHeight = (_h = getAxisTitleHeight(theme.xAxis, (_g = (_f = (_e = axes) === null || _e === void 0 ? void 0 : _e.xAxis) === null || _f === void 0 ? void 0 : _f.title) === null || _g === void 0 ? void 0 : _g.offsetY), (_h !== null && _h !== void 0 ? _h : 0));
+            const yAxisTitleHeight = (_g = getAxisTitleHeight(theme.yAxis, (_f = (_e = (_d = axes) === null || _d === void 0 ? void 0 : _d.yAxis) === null || _e === void 0 ? void 0 : _e.title) === null || _f === void 0 ? void 0 : _f.offsetY), (_g !== null && _g !== void 0 ? _g : 0));
+            const xAxisTitleHeight = (_l = getAxisTitleHeight(theme.xAxis, (_k = (_j = (_h = axes) === null || _h === void 0 ? void 0 : _h.xAxis) === null || _j === void 0 ? void 0 : _j.title) === null || _k === void 0 ? void 0 : _k.offsetY), (_l !== null && _l !== void 0 ? _l : 0));
             // Don't change the order!
             // exportMenu -> resetButton -> title -> yAxis.title -> yAxis -> secondaryYAxisTitle -> secondaryYAxis -> xAxis -> xAxis.title -> legend -> circleLegend -> plot -> circularAxis.title
             const exportMenu = getExportMenuRect(chartSize, isExportMenuVisible(options));
             const resetButton = getResetButtonRect(exportMenu, isUsingResetButton(options));
             const btnAreaRect = exportMenu.height ? exportMenu : resetButton;
-            const title = getTitleRect(chartSize, btnAreaRect, !!((_j = options.chart) === null || _j === void 0 ? void 0 : _j.title), titleHeight);
-            const yAxisTitleVisible = !!((_k = yAxisOption) === null || _k === void 0 ? void 0 : _k.title) || !!((_l = secondaryYAxisOption) === null || _l === void 0 ? void 0 : _l.title);
+            const title = getTitleRect(chartSize, btnAreaRect, !!((_m = options.chart) === null || _m === void 0 ? void 0 : _m.title), titleHeight);
+            const yAxisTitleVisible = !!((_o = yAxisOption) === null || _o === void 0 ? void 0 : _o.title) || !!((_p = secondaryYAxisOption) === null || _p === void 0 ? void 0 : _p.title);
+            const xAxisTitleVisible = !!((_q = options.xAxis) === null || _q === void 0 ? void 0 : _q.title);
             const yAxisTitle = getYAxisTitleRect({
                 chartSize,
                 visible: yAxisTitleVisible,
@@ -400,17 +407,10 @@ const layout = {
                 visibleSecondaryYAxis,
                 yAxisTitleHeight,
             });
-            const yAxis = getYAxisRect({
-                chartSize,
-                legend: legendState,
-                circleLegend: circleLegendState,
-                yAxisTitle,
+            const yAxis = getYAxisRect(Object.assign(Object.assign({ chartSize, legend: legendState, circleLegend: circleLegendState, yAxisTitle,
+                labelOnYAxis,
                 hasCenterYAxis,
-                hasXYAxis,
-                maxLabelWidth: getYAxisMaxLabelWidth((_m = axes) === null || _m === void 0 ? void 0 : _m.yAxis.maxLabelWidth),
-                size: optionSize,
-                xAxisTitleHeight,
-            });
+                hasXYAxis }, (_r = axes) === null || _r === void 0 ? void 0 : _r.yAxis), { maxLabelWidth: getYAxisMaxLabelWidth((_s = axes) === null || _s === void 0 ? void 0 : _s.yAxis.maxLabelWidth), size: optionSize, xAxisTitleHeight: xAxisTitleVisible ? xAxisTitleHeight : 0 }));
             const secondaryYAxisTitle = getYAxisTitleRect({
                 chartSize,
                 visible: yAxisTitleVisible,
@@ -428,11 +428,17 @@ const layout = {
                 yAxisTitle: secondaryYAxisTitle,
                 hasCenterYAxis,
                 hasXYAxis,
-                maxLabelWidth: getYAxisMaxLabelWidth((_p = (_o = axes) === null || _o === void 0 ? void 0 : _o.secondaryYAxis) === null || _p === void 0 ? void 0 : _p.maxLabelWidth),
+                labelOnYAxis,
+                maxLabelWidth: getYAxisMaxLabelWidth((_u = (_t = axes) === null || _t === void 0 ? void 0 : _t.secondaryYAxis) === null || _u === void 0 ? void 0 : _u.maxLabelWidth),
+                maxLabelHeight: (_x = (_w = (_v = axes) === null || _v === void 0 ? void 0 : _v.secondaryYAxis) === null || _w === void 0 ? void 0 : _w.maxLabelHeight, (_x !== null && _x !== void 0 ? _x : 0)),
+                firstLabelWidth: (_0 = (_z = (_y = axes) === null || _y === void 0 ? void 0 : _y.secondaryYAxis) === null || _z === void 0 ? void 0 : _z.firstLabelWidth, (_0 !== null && _0 !== void 0 ? _0 : 0)),
+                firstLabelHeight: (_3 = (_2 = (_1 = axes) === null || _1 === void 0 ? void 0 : _1.secondaryYAxis) === null || _2 === void 0 ? void 0 : _2.firstLabelHeight, (_3 !== null && _3 !== void 0 ? _3 : 0)),
+                lastLabelWidth: (_6 = (_5 = (_4 = axes) === null || _4 === void 0 ? void 0 : _4.secondaryYAxis) === null || _5 === void 0 ? void 0 : _5.lastLabelWidth, (_6 !== null && _6 !== void 0 ? _6 : 0)),
+                lastLabelHeight: (_9 = (_8 = (_7 = axes) === null || _7 === void 0 ? void 0 : _7.secondaryYAxis) === null || _8 === void 0 ? void 0 : _8.lastLabelHeight, (_9 !== null && _9 !== void 0 ? _9 : 0)),
                 size: optionSize,
                 isRightSide: true,
                 visibleSecondaryYAxis,
-                xAxisTitleHeight,
+                xAxisTitleHeight: xAxisTitleVisible ? xAxisTitleHeight : 0,
             });
             const xAxis = getXAxisRect({
                 chartSize,
@@ -443,9 +449,9 @@ const layout = {
                 hasCenterYAxis,
                 hasXYAxis,
                 size: optionSize,
-                xAxisData: (_q = axes) === null || _q === void 0 ? void 0 : _q.xAxis,
+                xAxisData: (_10 = axes) === null || _10 === void 0 ? void 0 : _10.xAxis,
             });
-            const xAxisTitle = getXAxisTitleRect(!!((_r = options.xAxis) === null || _r === void 0 ? void 0 : _r.title), xAxis, xAxisTitleHeight);
+            const xAxisTitle = getXAxisTitleRect(xAxisTitleVisible, xAxis, xAxisTitleHeight);
             const legend = getLegendRect({
                 chartSize,
                 xAxis,
@@ -459,7 +465,7 @@ const layout = {
             adjustAxisSize(chartSize, { title, yAxisTitle, yAxis, xAxis, xAxisTitle, legend, secondaryYAxis }, legendState);
             const circleLegend = getCircleLegendRect(xAxis, yAxis, legendState.align, circleLegendState.width);
             const plot = getPlotRect(xAxis, yAxis, optionSize.plot);
-            const circularAxisTitle = getCircularAxisTitleRect(plot, theme.circularAxis, (_s = radialAxes) === null || _s === void 0 ? void 0 : _s.circularAxis);
+            const circularAxisTitle = getCircularAxisTitleRect(plot, theme.circularAxis, (_11 = radialAxes) === null || _11 === void 0 ? void 0 : _11.circularAxis);
             extend(state.layout, {
                 chart: { x: 0, y: 0, width, height },
                 title,

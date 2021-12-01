@@ -136,7 +136,7 @@ export function makeDefaultTheme(series, globalFontFamily = 'Arial') {
     return {
         chart: {
             fontFamily: globalFontFamily,
-            backgroundColor: '#ffffff',
+            backgroundColor: '#949090',
         },
         noData: {
             fontSize: 18,

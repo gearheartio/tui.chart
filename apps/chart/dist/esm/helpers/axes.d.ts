@@ -56,6 +56,14 @@ export declare function getMaxLabelSize(labels: string[], xMargin: number, font?
     maxLabelWidth: number;
     maxLabelHeight: number;
 };
+export declare function getFirstLabelSize(labels: string[], xMargin: number, font?: string): {
+    firstLabelWidth: number;
+    firstLabelHeight: number;
+};
+export declare function getLastLabelSize(labels: string[], xMargin: number, font?: string): {
+    lastLabelWidth: number;
+    lastLabelHeight: number;
+};
 export declare function getLabelXMargin(axisName: string, options: Options): number;
 export declare function getInitAxisIntervalData(isLabelAxis: boolean, params: AxisDataParams): InitAxisData;
 export declare function getDefaultRadialAxisData(options: Options, plot: Rect, maxLabelWidth?: number, maxLabelHeight?: number, isLabelOnVerticalAxis?: boolean): DefaultRadialAxisData;

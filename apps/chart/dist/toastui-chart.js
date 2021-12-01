@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Chart 4th Edition
- * @version 4.5.2 | Tue Nov 30 2021
+ * @version 4.5.3 | Wed Dec 01 2021
  * @author NHN. FE Development Lab <dl_javascript@nhn.com>
  * @license MIT
  */
@@ -10864,7 +10864,7 @@ function isLabelAxisOnYAxis(_ref) {
   var series = _ref.series,
       options = _ref.options,
       categories = _ref.categories;
-  return !!series.bar || !!series.radialBar || !!series.gauge && Array.isArray(categories) && !categories.length || !!series.bullet && !(options !== null && options !== void 0 && (_series = options.series) !== null && _series !== void 0 && _series.vertical);
+  return !!series.heatmap || !!series.bar || !!series.radialBar || !!series.gauge && Array.isArray(categories) && !categories.length || !!series.bullet && !(options !== null && options !== void 0 && (_series = options.series) !== null && _series !== void 0 && _series.vertical);
 }
 function hasBoxTypeSeries(series) {
   return !!series.column || !!series.bar || !!series.boxPlot || !!series.bullet;
@@ -11086,14 +11086,16 @@ function makeRotationData(maxLabelWidth, maxLabelHeight, distance, rotatable) {
     return {
       needRotateLabel: false,
       radian: 0,
-      rotationHeight: maxLabelHeight
+      rotationHeight: maxLabelHeight,
+      rotationWidth: maxLabelWidth
     };
   }
 
   return {
     needRotateLabel: degree > 0,
     radian: calculateDegreeToRadian(degree, 0),
-    rotationHeight: calculateRotatedHeight(degree, maxLabelWidth, maxLabelHeight)
+    rotationHeight: calculateRotatedHeight(degree, maxLabelWidth, maxLabelHeight),
+    rotationWidth: calculateRotatedWidth(degree, maxLabelWidth, maxLabelHeight)
   };
 }
 function getMaxLabelSize(labels, xMargin) {
@@ -11104,6 +11106,26 @@ function getMaxLabelSize(labels, xMargin) {
   return {
     maxLabelWidth: getTextWidth(maxLengthLabel, font) + xMargin,
     maxLabelHeight: getTextHeight(maxLengthLabel, font)
+  };
+}
+function getFirstLabelSize(labels, xMargin) {
+  var _labels$;
+
+  var font = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : DEFAULT_LABEL_TEXT;
+  var maxLengthLabel = (_labels$ = labels[0]) !== null && _labels$ !== void 0 ? _labels$ : '';
+  return {
+    firstLabelWidth: getTextWidth(maxLengthLabel, font) + xMargin,
+    firstLabelHeight: getTextHeight(maxLengthLabel, font)
+  };
+}
+function getLastLabelSize(labels, xMargin) {
+  var _labels;
+
+  var font = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : DEFAULT_LABEL_TEXT;
+  var maxLengthLabel = (_labels = labels[labels.length - 1]) !== null && _labels !== void 0 ? _labels : '';
+  return {
+    lastLabelWidth: getTextWidth(maxLengthLabel, font) + xMargin,
+    lastLabelHeight: getTextHeight(maxLengthLabel, font)
   };
 }
 function getLabelXMargin(axisName, options) {
@@ -11385,7 +11407,7 @@ function getLabelAxisData(stateProp) {
     scale: scale
   }, initialAxisData), axisSize);
   var axisLabelMargin = getLabelXMargin(axisName, options);
-  return store_axes_objectSpread(store_axes_objectSpread({
+  return store_axes_objectSpread(store_axes_objectSpread(store_axes_objectSpread(store_axes_objectSpread({
     labels: labels,
     viewLabels: viewLabels,
     pointOnColumn: pointOnColumn,
@@ -11395,7 +11417,7 @@ function getLabelAxisData(stateProp) {
     labelRange: labelRange,
     rectResponderCount: rectResponderCount,
     isLabelAxis: true
-  }, initialAxisData), getMaxLabelSize(labels, axisLabelMargin, getTitleFontString(theme.label)));
+  }, initialAxisData), getMaxLabelSize(labels, axisLabelMargin, getTitleFontString(theme.label))), getFirstLabelSize(labels, axisLabelMargin, getTitleFontString(theme.label))), getLastLabelSize(labels, axisLabelMargin, getTitleFontString(theme.label)));
 }
 
 function getValueAxisData(stateProp) {
@@ -11441,14 +11463,14 @@ function getValueAxisData(stateProp) {
   }, initialAxisData), size);
   var axisLabelMargin = getLabelXMargin(axisName, options);
 
-  var axisData = store_axes_objectSpread(store_axes_objectSpread({
+  var axisData = store_axes_objectSpread(store_axes_objectSpread(store_axes_objectSpread(store_axes_objectSpread({
     labels: labels,
     viewLabels: viewLabels,
     pointOnColumn: pointOnColumn,
     isLabelAxis: false,
     tickCount: tickCount,
     tickDistance: tickDistance
-  }, initialAxisData), getMaxLabelSize(labels, axisLabelMargin, getTitleFontString(theme.label)));
+  }, initialAxisData), getMaxLabelSize(labels, axisLabelMargin, getTitleFontString(theme.label))), getFirstLabelSize(labels, axisLabelMargin, getTitleFontString(theme.label))), getLastLabelSize(labels, axisLabelMargin, getTitleFontString(theme.label)));
 
   if (isNumber(zeroPosition)) {
     axisData.zeroPosition = zeroPosition;
@@ -11545,17 +11567,22 @@ function makeXAxisData(_ref2) {
   var viewLabels = axisData.viewLabels,
       pointOnColumn = axisData.pointOnColumn,
       maxLabelWidth = axisData.maxLabelWidth,
-      maxLabelHeight = axisData.maxLabelHeight;
+      maxLabelHeight = axisData.maxLabelHeight,
+      lastLabelWidth = axisData.lastLabelWidth;
   var offsetY = getAxisLabelAnchorPoint(maxLabelHeight) + labelMargin;
   var size = centerYAxis ? centerYAxis.xAxisHalfSize : axisSize;
   var distance = size / (viewLabels.length - (pointOnColumn ? 0 : 1));
   var rotationData = makeRotationData(maxLabelWidth, maxLabelHeight, distance, rotatable);
   var needRotateLabel = rotationData.needRotateLabel,
-      rotationHeight = rotationData.rotationHeight;
-  var maxHeight = (needRotateLabel ? rotationHeight : maxLabelHeight) + offsetY;
+      rotationHeight = rotationData.rotationHeight,
+      rotationWidth = rotationData.rotationWidth;
+  var labelHeight = needRotateLabel ? rotationHeight : maxLabelHeight / 2;
+  var maxHeight = labelHeight + offsetY;
+  var extraLabelWidth = needRotateLabel ? rotationWidth * lastLabelWidth / maxLabelWidth : lastLabelWidth / 2;
   return store_axes_objectSpread(store_axes_objectSpread(store_axes_objectSpread({}, axisData), rotationData), {}, {
     maxHeight: maxHeight,
-    offsetY: offsetY
+    offsetY: offsetY,
+    extraLabelWidth: extraLabelWidth
   });
 }
 
@@ -13037,11 +13064,15 @@ function layout_defineProperty(obj, key, value) { if (key in obj) { Object.defin
 
 
 
+var chartPadding = {
+  X: 5,
+  Y: 5
+};
 var padding = {
   X: 10,
   Y: 15
 };
-var X_AXIS_HEIGHT = 10;
+var X_AXIS_HEIGHT = 20;
 var Y_AXIS_MIN_WIDTH = 40;
 function isVerticalAlign(align) {
   return align === 'top' || align === 'bottom';
@@ -13098,8 +13129,11 @@ function getYAxisXPoint(yAxisRectParam) {
 }
 
 function getYAxisYPoint(_ref) {
-  var yAxisTitle = _ref.yAxisTitle;
-  return yAxisTitle.y + yAxisTitle.height;
+  var yAxisTitle = _ref.yAxisTitle,
+      firstLabelHeight = _ref.firstLabelHeight,
+      labelOnYAxis = _ref.labelOnYAxis;
+  var extraLabelHeight = labelOnYAxis ? 0 : firstLabelHeight / 2;
+  return yAxisTitle.y + yAxisTitle.height + extraLabelHeight;
 }
 
 function getDefaultYAxisWidth(_ref2) {
@@ -13138,13 +13172,14 @@ function getYAxisHeight(_ref3) {
       yAxisTitle = _ref3.yAxisTitle,
       hasXYAxis = _ref3.hasXYAxis,
       size = _ref3.size,
+      lastLabelHeight = _ref3.lastLabelHeight,
       xAxisTitleHeight = _ref3.xAxisTitleHeight;
   var height = chartSize.height;
   var align = legend.align,
       legendHeight = legend.height;
   var xAxisHeight = getDefaultXAxisHeight(size);
   var y = yAxisTitle.y + yAxisTitle.height;
-  var yAxisHeight = height - y - xAxisHeight - xAxisTitleHeight;
+  var yAxisHeight = height - y - xAxisHeight - xAxisTitleHeight + lastLabelHeight / 2;
 
   if (!hasXYAxis) {
     yAxisHeight = height - y;
@@ -13213,9 +13248,8 @@ function getXAxisWidth(_ref4) {
     xAxisWidth -= secondaryYAxis.width;
   }
 
-  if (xAxisData !== null && xAxisData !== void 0 && xAxisData.maxLabelWidth) {
-    // subtract half of the maximum label length to secure margin size
-    xAxisWidth -= xAxisData.maxLabelWidth * 0.5;
+  if (xAxisData !== null && xAxisData !== void 0 && xAxisData.extraLabelWidth) {
+    xAxisWidth -= xAxisData === null || xAxisData === void 0 ? void 0 : xAxisData.extraLabelWidth;
   }
 
   return xAxisWidth;
@@ -13285,7 +13319,7 @@ function getLegendRect(legendRectParams) {
       y = yAxis.y + yAxis.height + (hasXYAxis ? xAxis.height + xAxisTitleHeight : padding.Y);
     }
   } else if (align === 'left') {
-    x = 0;
+    x = chartPadding.X;
   }
 
   return {
@@ -13314,8 +13348,8 @@ function getPlotRect(xAxis, yAxis, size) {
 
 function getTitleRect(chartSize, exportMenu, visible, titleHeight) {
   var point = {
-    x: 0,
-    y: 0
+    x: chartPadding.X,
+    y: chartPadding.Y
   };
   var marginBottom = 5;
   var width = visible ? chartSize.width - exportMenu.width : 0;
@@ -13373,11 +13407,12 @@ function getYAxisTitleRect(_ref5) {
 }
 
 function getXAxisTitleRect(visible, xAxis, xAxisTitleHeight) {
+  var marginTop = 5;
   var point = {
     x: xAxis.x,
-    y: xAxis.y + xAxis.height
+    y: xAxis.y + xAxis.height + marginTop
   };
-  var height = visible ? xAxisTitleHeight : 0;
+  var height = visible ? xAxisTitleHeight + marginTop : 0;
   var width = visible ? xAxis.width : 0;
   return layout_objectSpread({
     height: height,
@@ -13387,8 +13422,8 @@ function getXAxisTitleRect(visible, xAxis, xAxisTitleHeight) {
 
 function getExportMenuRect(chartSize, visible) {
   var marginY = 5;
-  var x = visible ? chartSize.width - BUTTON_RECT_SIZE : padding.X + chartSize.width;
-  var y = 0;
+  var x = visible ? chartPadding.X + chartSize.width - BUTTON_RECT_SIZE : chartPadding.X + chartSize.width;
+  var y = chartPadding.Y;
   var height = visible ? BUTTON_RECT_SIZE + marginY : 0;
   var width = visible ? BUTTON_RECT_SIZE : 0;
   return {
@@ -13401,7 +13436,7 @@ function getExportMenuRect(chartSize, visible) {
 
 function getResetButtonRect(exportMenu, useResetButton) {
   var marginY = 5;
-  var x = useResetButton ? exportMenu.x - BUTTON_RECT_SIZE - padding.X : 0;
+  var x = useResetButton ? exportMenu.x - BUTTON_RECT_SIZE - chartPadding.X : 0;
   var y = useResetButton ? exportMenu.y : 0;
   var height = useResetButton ? BUTTON_RECT_SIZE + marginY : 0;
   var width = useResetButton ? BUTTON_RECT_SIZE : 0;
@@ -13567,7 +13602,7 @@ var layout = {
   },
   action: {
     setLayout: function setLayout(_ref7) {
-      var _getAxisTitleHeight, _axes$yAxis, _axes$yAxis$title, _getAxisTitleHeight2, _axes$xAxis, _axes$xAxis$title, _options$chart, _axes$secondaryYAxis, _options$xAxis;
+      var _axes$yAxis$firstLabe, _axes$yAxis, _getAxisTitleHeight, _axes$yAxis2, _axes$yAxis2$title, _getAxisTitleHeight2, _axes$xAxis, _axes$xAxis$title, _options$chart, _options$xAxis, _axes$secondaryYAxis, _axes$secondaryYAxis$, _axes$secondaryYAxis2, _axes$secondaryYAxis$2, _axes$secondaryYAxis3, _axes$secondaryYAxis$3, _axes$secondaryYAxis4, _axes$secondaryYAxis$4, _axes$secondaryYAxis5, _axes$secondaryYAxis$5, _axes$secondaryYAxis6;
 
       var state = _ref7.state;
       var legendState = state.legend,
@@ -13580,9 +13615,14 @@ var layout = {
           radialAxes = state.radialAxes;
       var width = chart.width,
           height = chart.height;
+      var labelOnYAxis = isLabelAxisOnYAxis({
+        series: series,
+        options: options
+      });
+      var yAxisPadding = labelOnYAxis ? 0 : ((_axes$yAxis$firstLabe = axes === null || axes === void 0 ? void 0 : (_axes$yAxis = axes.yAxis) === null || _axes$yAxis === void 0 ? void 0 : _axes$yAxis.firstLabelHeight) !== null && _axes$yAxis$firstLabe !== void 0 ? _axes$yAxis$firstLabe : 0) / 2;
       var chartSize = {
-        height: height,
-        width: width
+        height: height - yAxisPadding - chartPadding.Y * 2,
+        width: width - chartPadding.X * 2
       };
       var hasCenterYAxis = series.bar ? isCenterYAxis(options) : false;
       var hasXYAxis = hasXYAxes(series);
@@ -13594,7 +13634,7 @@ var layout = {
 
       var visibleSecondaryYAxis = !!secondaryYAxisOption;
       var titleHeight = theme.title.fontSize;
-      var yAxisTitleHeight = (_getAxisTitleHeight = getAxisTitleHeight(theme.yAxis, axes === null || axes === void 0 ? void 0 : (_axes$yAxis = axes.yAxis) === null || _axes$yAxis === void 0 ? void 0 : (_axes$yAxis$title = _axes$yAxis.title) === null || _axes$yAxis$title === void 0 ? void 0 : _axes$yAxis$title.offsetY)) !== null && _getAxisTitleHeight !== void 0 ? _getAxisTitleHeight : 0;
+      var yAxisTitleHeight = (_getAxisTitleHeight = getAxisTitleHeight(theme.yAxis, axes === null || axes === void 0 ? void 0 : (_axes$yAxis2 = axes.yAxis) === null || _axes$yAxis2 === void 0 ? void 0 : (_axes$yAxis2$title = _axes$yAxis2.title) === null || _axes$yAxis2$title === void 0 ? void 0 : _axes$yAxis2$title.offsetY)) !== null && _getAxisTitleHeight !== void 0 ? _getAxisTitleHeight : 0;
       var xAxisTitleHeight = (_getAxisTitleHeight2 = getAxisTitleHeight(theme.xAxis, axes === null || axes === void 0 ? void 0 : (_axes$xAxis = axes.xAxis) === null || _axes$xAxis === void 0 ? void 0 : (_axes$xAxis$title = _axes$xAxis.title) === null || _axes$xAxis$title === void 0 ? void 0 : _axes$xAxis$title.offsetY)) !== null && _getAxisTitleHeight2 !== void 0 ? _getAxisTitleHeight2 : 0; // Don't change the order!
       // exportMenu -> resetButton -> title -> yAxis.title -> yAxis -> secondaryYAxisTitle -> secondaryYAxis -> xAxis -> xAxis.title -> legend -> circleLegend -> plot -> circularAxis.title
 
@@ -13603,6 +13643,7 @@ var layout = {
       var btnAreaRect = exportMenu.height ? exportMenu : resetButton;
       var title = getTitleRect(chartSize, btnAreaRect, !!((_options$chart = options.chart) !== null && _options$chart !== void 0 && _options$chart.title), titleHeight);
       var yAxisTitleVisible = !!(yAxisOption !== null && yAxisOption !== void 0 && yAxisOption.title) || !!(secondaryYAxisOption !== null && secondaryYAxisOption !== void 0 && secondaryYAxisOption.title);
+      var xAxisTitleVisible = !!((_options$xAxis = options.xAxis) !== null && _options$xAxis !== void 0 && _options$xAxis.title);
       var yAxisTitle = getYAxisTitleRect({
         chartSize: chartSize,
         visible: yAxisTitleVisible,
@@ -13612,17 +13653,19 @@ var layout = {
         visibleSecondaryYAxis: visibleSecondaryYAxis,
         yAxisTitleHeight: yAxisTitleHeight
       });
-      var yAxis = getYAxisRect({
+      var yAxis = getYAxisRect(layout_objectSpread(layout_objectSpread({
         chartSize: chartSize,
         legend: legendState,
         circleLegend: circleLegendState,
         yAxisTitle: yAxisTitle,
+        labelOnYAxis: labelOnYAxis,
         hasCenterYAxis: hasCenterYAxis,
-        hasXYAxis: hasXYAxis,
+        hasXYAxis: hasXYAxis
+      }, axes === null || axes === void 0 ? void 0 : axes.yAxis), {}, {
         maxLabelWidth: getYAxisMaxLabelWidth(axes === null || axes === void 0 ? void 0 : axes.yAxis.maxLabelWidth),
         size: optionSize,
-        xAxisTitleHeight: xAxisTitleHeight
-      });
+        xAxisTitleHeight: xAxisTitleVisible ? xAxisTitleHeight : 0
+      }));
       var secondaryYAxisTitle = getYAxisTitleRect({
         chartSize: chartSize,
         visible: yAxisTitleVisible,
@@ -13640,11 +13683,17 @@ var layout = {
         yAxisTitle: secondaryYAxisTitle,
         hasCenterYAxis: hasCenterYAxis,
         hasXYAxis: hasXYAxis,
+        labelOnYAxis: labelOnYAxis,
         maxLabelWidth: getYAxisMaxLabelWidth(axes === null || axes === void 0 ? void 0 : (_axes$secondaryYAxis = axes.secondaryYAxis) === null || _axes$secondaryYAxis === void 0 ? void 0 : _axes$secondaryYAxis.maxLabelWidth),
+        maxLabelHeight: (_axes$secondaryYAxis$ = axes === null || axes === void 0 ? void 0 : (_axes$secondaryYAxis2 = axes.secondaryYAxis) === null || _axes$secondaryYAxis2 === void 0 ? void 0 : _axes$secondaryYAxis2.maxLabelHeight) !== null && _axes$secondaryYAxis$ !== void 0 ? _axes$secondaryYAxis$ : 0,
+        firstLabelWidth: (_axes$secondaryYAxis$2 = axes === null || axes === void 0 ? void 0 : (_axes$secondaryYAxis3 = axes.secondaryYAxis) === null || _axes$secondaryYAxis3 === void 0 ? void 0 : _axes$secondaryYAxis3.firstLabelWidth) !== null && _axes$secondaryYAxis$2 !== void 0 ? _axes$secondaryYAxis$2 : 0,
+        firstLabelHeight: (_axes$secondaryYAxis$3 = axes === null || axes === void 0 ? void 0 : (_axes$secondaryYAxis4 = axes.secondaryYAxis) === null || _axes$secondaryYAxis4 === void 0 ? void 0 : _axes$secondaryYAxis4.firstLabelHeight) !== null && _axes$secondaryYAxis$3 !== void 0 ? _axes$secondaryYAxis$3 : 0,
+        lastLabelWidth: (_axes$secondaryYAxis$4 = axes === null || axes === void 0 ? void 0 : (_axes$secondaryYAxis5 = axes.secondaryYAxis) === null || _axes$secondaryYAxis5 === void 0 ? void 0 : _axes$secondaryYAxis5.lastLabelWidth) !== null && _axes$secondaryYAxis$4 !== void 0 ? _axes$secondaryYAxis$4 : 0,
+        lastLabelHeight: (_axes$secondaryYAxis$5 = axes === null || axes === void 0 ? void 0 : (_axes$secondaryYAxis6 = axes.secondaryYAxis) === null || _axes$secondaryYAxis6 === void 0 ? void 0 : _axes$secondaryYAxis6.lastLabelHeight) !== null && _axes$secondaryYAxis$5 !== void 0 ? _axes$secondaryYAxis$5 : 0,
         size: optionSize,
         isRightSide: true,
         visibleSecondaryYAxis: visibleSecondaryYAxis,
-        xAxisTitleHeight: xAxisTitleHeight
+        xAxisTitleHeight: xAxisTitleVisible ? xAxisTitleHeight : 0
       });
       var xAxis = getXAxisRect({
         chartSize: chartSize,
@@ -13657,7 +13706,7 @@ var layout = {
         size: optionSize,
         xAxisData: axes === null || axes === void 0 ? void 0 : axes.xAxis
       });
-      var xAxisTitle = getXAxisTitleRect(!!((_options$xAxis = options.xAxis) !== null && _options$xAxis !== void 0 && _options$xAxis.title), xAxis, xAxisTitleHeight);
+      var xAxisTitle = getXAxisTitleRect(xAxisTitleVisible, xAxis, xAxisTitleHeight);
       var legend = getLegendRect({
         chartSize: chartSize,
         xAxis: xAxis,
@@ -14895,7 +14944,7 @@ function makeDefaultTheme(series) {
   return {
     chart: {
       fontFamily: globalFontFamily,
-      backgroundColor: '#ffffff'
+      backgroundColor: '#949090'
     },
     noData: {
       fontSize: 18,
@@ -26300,7 +26349,11 @@ function getHeatmapAxisData(stateProp, axisType) {
     labelInterval: labelInterval,
     title: makeTitleOption((_options$axisType3 = options[axisType]) === null || _options$axisType3 === void 0 ? void 0 : _options$axisType3.title),
     maxLabelWidth: maxLabelWidth,
-    maxLabelHeight: maxLabelHeight
+    maxLabelHeight: maxLabelHeight,
+    firstLabelWidth: 0,
+    firstLabelHeight: 0,
+    lastLabelWidth: 0,
+    lastLabelHeight: 0
   };
 
   if (axisType === AxisType.X) {
@@ -26312,7 +26365,8 @@ function getHeatmapAxisData(stateProp, axisType) {
     var rotationData = makeRotationData(maxLabelWidth, maxLabelHeight, distance, getRotatableOption(options));
     var needRotateLabel = rotationData.needRotateLabel,
         rotationHeight = rotationData.rotationHeight;
-    var maxHeight = (needRotateLabel ? rotationHeight : maxLabelHeight) + offsetY;
+    var labelHeight = needRotateLabel ? rotationHeight : maxLabelHeight / 2;
+    var maxHeight = labelHeight + offsetY;
     return heatmapAxes_objectSpread(heatmapAxes_objectSpread(heatmapAxes_objectSpread({}, axisData), rotationData), {}, {
       maxHeight: maxHeight,
       offsetY: offsetY
