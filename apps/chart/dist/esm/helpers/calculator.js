@@ -24,7 +24,9 @@ export function getFontHeight(font = DEFAULT_LABEL_TEXT) {
     return parseInt(String(Number(fontSize) * LINE_HEIGHT_NORMAL), 10);
 }
 export function getAxisLabelAnchorPoint(labelHeight) {
-    return crispPixel(TICK_SIZE * 2 + labelHeight / 2);
+    // There is no need for padding off axis tick when there is no label
+    const tickSize = labelHeight <= 1 ? TICK_SIZE : TICK_SIZE * 2;
+    return crispPixel(tickSize + labelHeight / 2);
 }
 function getDecimalLength(value) {
     var _a, _b;

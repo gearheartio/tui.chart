@@ -8,7 +8,6 @@ import { getYAxisOption, isLabelAxisOnYAxis } from "../helpers/axes";
 const chartPadding = { X: 10, Y: 10 };
 export const padding = { X: 10, Y: 15 };
 const X_AXIS_HEIGHT = 20;
-const Y_AXIS_MIN_WIDTH = 40;
 export function isVerticalAlign(align) {
     return align === 'top' || align === 'bottom';
 }
@@ -21,7 +20,7 @@ function getValidRectSize(size, width, height) {
 }
 function getDefaultXAxisHeight(size) {
     var _a;
-    return ((_a = size.xAxis) === null || _a === void 0 ? void 0 : _a.height) && !size.yAxis ? size.xAxis.height : X_AXIS_HEIGHT;
+    return ((_a = size.xAxis) === null || _a === void 0 ? void 0 : _a.height) && !size.yAxis ? size.xAxis.height : 0;
 }
 function getDefaultYAxisXPoint(yAxisRectParam) {
     const { yAxisTitle, isRightSide, visibleSecondaryYAxis } = yAxisRectParam;
@@ -67,13 +66,13 @@ function getYAxisWidth(yAxisRectParam) {
     }
     return yAxisWidth;
 }
-function getYAxisHeight({ chartSize, legend, yAxisTitle, hasXYAxis, size, lastLabelHeight, xAxisTitleHeight, }) {
+function getYAxisHeight({ chartSize, legend, yAxisTitle, hasXYAxis, size, xAxisTitleHeight, xAxisData, }) {
     var _a, _b, _c, _d;
     const { height } = chartSize;
     const { align, height: legendHeight } = legend;
-    const xAxisHeight = getDefaultXAxisHeight(size);
+    const xAxisHeight = getDefaultXAxisHeight(size) | getXAxisHeight(xAxisData, hasXYAxis);
     const y = yAxisTitle.y + yAxisTitle.height;
-    let yAxisHeight = height - y - xAxisHeight - xAxisTitleHeight + lastLabelHeight / 2;
+    let yAxisHeight = height - y - xAxisHeight - xAxisTitleHeight;
     if (!hasXYAxis) {
         yAxisHeight = height - y;
     }
@@ -261,7 +260,10 @@ export function isExportMenuVisible(options) {
     return isUndefined(visible) ? true : visible;
 }
 function getYAxisMaxLabelWidth(maxLabelLength) {
-    return maxLabelLength ? maxLabelLength + padding.X : Y_AXIS_MIN_WIDTH;
+    if (isUndefined(maxLabelLength) || maxLabelLength === 0) {
+        return TICK_SIZE;
+    }
+    return maxLabelLength + chartPadding.X;
 }
 function pickOptionSize(option) {
     if (!option || (isUndefined(option.width) && isUndefined(option.height))) {
@@ -329,13 +331,11 @@ function adjustAxisSize({ width, height }, layout, legendState) {
         title.height +
         legendHeight -
         height;
-    if (diffHeight > 0) {
-        yAxis.height -= diffHeight;
-        xAxis.y -= diffHeight;
-        xAxisTitle.y -= diffHeight;
-        if (hasVerticalLegend) {
-            legend.y -= diffHeight;
-        }
+    yAxis.height -= diffHeight;
+    xAxis.y -= diffHeight;
+    xAxisTitle.y -= diffHeight;
+    if (hasVerticalLegend) {
+        legend.y -= diffHeight;
     }
     secondaryYAxis.x = xAxis.x + xAxis.width;
     secondaryYAxis.height = yAxis.height;
@@ -373,7 +373,7 @@ const layout = {
     }),
     action: {
         setLayout({ state }) {
-            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11;
+            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13;
             const { legend: legendState, theme, circleLegend: circleLegendState, series, options, chart, axes, radialAxes, } = state;
             const { width, height } = chart;
             const labelOnYAxis = isLabelAxisOnYAxis({ series, options });
@@ -410,7 +410,7 @@ const layout = {
             const yAxis = getYAxisRect(Object.assign(Object.assign({ chartSize, legend: legendState, circleLegend: circleLegendState, yAxisTitle,
                 labelOnYAxis,
                 hasCenterYAxis,
-                hasXYAxis }, (_r = axes) === null || _r === void 0 ? void 0 : _r.yAxis), { maxLabelWidth: getYAxisMaxLabelWidth((_s = axes) === null || _s === void 0 ? void 0 : _s.yAxis.maxLabelWidth), size: optionSize, xAxisTitleHeight: xAxisTitleVisible ? xAxisTitleHeight : 0 }));
+                hasXYAxis }, (_r = axes) === null || _r === void 0 ? void 0 : _r.yAxis), { maxLabelWidth: getYAxisMaxLabelWidth((_s = axes) === null || _s === void 0 ? void 0 : _s.yAxis.maxLabelWidth), size: optionSize, xAxisTitleHeight: xAxisTitleVisible ? xAxisTitleHeight : 0, xAxisData: (_t = axes) === null || _t === void 0 ? void 0 : _t.xAxis }));
             const secondaryYAxisTitle = getYAxisTitleRect({
                 chartSize,
                 visible: yAxisTitleVisible,
@@ -429,16 +429,17 @@ const layout = {
                 hasCenterYAxis,
                 hasXYAxis,
                 labelOnYAxis,
-                maxLabelWidth: getYAxisMaxLabelWidth((_u = (_t = axes) === null || _t === void 0 ? void 0 : _t.secondaryYAxis) === null || _u === void 0 ? void 0 : _u.maxLabelWidth),
-                maxLabelHeight: (_x = (_w = (_v = axes) === null || _v === void 0 ? void 0 : _v.secondaryYAxis) === null || _w === void 0 ? void 0 : _w.maxLabelHeight, (_x !== null && _x !== void 0 ? _x : 0)),
-                firstLabelWidth: (_0 = (_z = (_y = axes) === null || _y === void 0 ? void 0 : _y.secondaryYAxis) === null || _z === void 0 ? void 0 : _z.firstLabelWidth, (_0 !== null && _0 !== void 0 ? _0 : 0)),
-                firstLabelHeight: (_3 = (_2 = (_1 = axes) === null || _1 === void 0 ? void 0 : _1.secondaryYAxis) === null || _2 === void 0 ? void 0 : _2.firstLabelHeight, (_3 !== null && _3 !== void 0 ? _3 : 0)),
-                lastLabelWidth: (_6 = (_5 = (_4 = axes) === null || _4 === void 0 ? void 0 : _4.secondaryYAxis) === null || _5 === void 0 ? void 0 : _5.lastLabelWidth, (_6 !== null && _6 !== void 0 ? _6 : 0)),
-                lastLabelHeight: (_9 = (_8 = (_7 = axes) === null || _7 === void 0 ? void 0 : _7.secondaryYAxis) === null || _8 === void 0 ? void 0 : _8.lastLabelHeight, (_9 !== null && _9 !== void 0 ? _9 : 0)),
+                maxLabelWidth: getYAxisMaxLabelWidth((_v = (_u = axes) === null || _u === void 0 ? void 0 : _u.secondaryYAxis) === null || _v === void 0 ? void 0 : _v.maxLabelWidth),
+                maxLabelHeight: (_y = (_x = (_w = axes) === null || _w === void 0 ? void 0 : _w.secondaryYAxis) === null || _x === void 0 ? void 0 : _x.maxLabelHeight, (_y !== null && _y !== void 0 ? _y : 0)),
+                firstLabelWidth: (_1 = (_0 = (_z = axes) === null || _z === void 0 ? void 0 : _z.secondaryYAxis) === null || _0 === void 0 ? void 0 : _0.firstLabelWidth, (_1 !== null && _1 !== void 0 ? _1 : 0)),
+                firstLabelHeight: (_4 = (_3 = (_2 = axes) === null || _2 === void 0 ? void 0 : _2.secondaryYAxis) === null || _3 === void 0 ? void 0 : _3.firstLabelHeight, (_4 !== null && _4 !== void 0 ? _4 : 0)),
+                lastLabelWidth: (_7 = (_6 = (_5 = axes) === null || _5 === void 0 ? void 0 : _5.secondaryYAxis) === null || _6 === void 0 ? void 0 : _6.lastLabelWidth, (_7 !== null && _7 !== void 0 ? _7 : 0)),
+                lastLabelHeight: (_10 = (_9 = (_8 = axes) === null || _8 === void 0 ? void 0 : _8.secondaryYAxis) === null || _9 === void 0 ? void 0 : _9.lastLabelHeight, (_10 !== null && _10 !== void 0 ? _10 : 0)),
                 size: optionSize,
                 isRightSide: true,
                 visibleSecondaryYAxis,
                 xAxisTitleHeight: xAxisTitleVisible ? xAxisTitleHeight : 0,
+                xAxisData: (_11 = axes) === null || _11 === void 0 ? void 0 : _11.xAxis,
             });
             const xAxis = getXAxisRect({
                 chartSize,
@@ -449,7 +450,7 @@ const layout = {
                 hasCenterYAxis,
                 hasXYAxis,
                 size: optionSize,
-                xAxisData: (_10 = axes) === null || _10 === void 0 ? void 0 : _10.xAxis,
+                xAxisData: (_12 = axes) === null || _12 === void 0 ? void 0 : _12.xAxis,
             });
             const xAxisTitle = getXAxisTitleRect(xAxisTitleVisible, xAxis, xAxisTitleHeight);
             const legend = getLegendRect({
@@ -465,7 +466,7 @@ const layout = {
             adjustAxisSize(chartSize, { title, yAxisTitle, yAxis, xAxis, xAxisTitle, legend, secondaryYAxis }, legendState);
             const circleLegend = getCircleLegendRect(xAxis, yAxis, legendState.align, circleLegendState.width);
             const plot = getPlotRect(xAxis, yAxis, optionSize.plot);
-            const circularAxisTitle = getCircularAxisTitleRect(plot, theme.circularAxis, (_11 = radialAxes) === null || _11 === void 0 ? void 0 : _11.circularAxis);
+            const circularAxisTitle = getCircularAxisTitleRect(plot, theme.circularAxis, (_13 = radialAxes) === null || _13 === void 0 ? void 0 : _13.circularAxis);
             extend(state.layout, {
                 chart: { x: 0, y: 0, width, height },
                 title,

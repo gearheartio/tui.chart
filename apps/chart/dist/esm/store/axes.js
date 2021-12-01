@@ -1,5 +1,5 @@
 import { getAxisFormatter, getAxisName, getAxisTheme, getFirstLabelSize, getInitAxisIntervalData, getLabelsAppliedFormatter, getLabelXMargin, getLastLabelSize, getMaxLabelSize, getRotatableOption, getSizeKey, getViewAxisLabels, getYAxisOption, hasAxesLayoutChanged, hasBoxTypeSeries, isDateType, isLabelAxisOnYAxis, isPointOnColumn, makeRotationData, makeTitleOption, } from "../helpers/axes";
-import { getAxisLabelAnchorPoint, makeLabelsFromLimit } from "../helpers/calculator";
+import { crispPixel, getAxisLabelAnchorPoint, makeLabelsFromLimit } from "../helpers/calculator";
 import { deepMergedCopy, hasNegativeOnly, isNumber, pickProperty } from "../helpers/utils";
 import { isCoordinateSeries } from "../helpers/coordinate";
 import { AxisType } from "../component/axis";
@@ -156,14 +156,11 @@ function makeXAxisData({ axisData, axisSize, centerYAxis, rotatable, labelMargin
     const distance = size / (viewLabels.length - (pointOnColumn ? 0 : 1));
     const rotationData = makeRotationData(maxLabelWidth, maxLabelHeight, distance, rotatable);
     const { needRotateLabel, rotationHeight, rotationWidth } = rotationData;
-    const labelHeight = needRotateLabel ? rotationHeight : maxLabelHeight / 2;
+    const labelHeight = crispPixel(needRotateLabel ? rotationHeight : maxLabelHeight / 2);
     const maxHeight = labelHeight + offsetY;
-    const extraLabelWidth = needRotateLabel
-        ? (rotationWidth * lastLabelWidth) / maxLabelWidth
-        : lastLabelWidth / 2;
+    const extraLabelWidth = crispPixel(needRotateLabel ? (rotationWidth * lastLabelWidth) / maxLabelWidth : lastLabelWidth / 2);
     return Object.assign(Object.assign(Object.assign({}, axisData), rotationData), { maxHeight,
-        offsetY,
-        extraLabelWidth });
+        offsetY, extraLabelWidth: pointOnColumn ? 0 : extraLabelWidth });
 }
 function getAxisInfo(labelOnYAxis, plot, series) {
     const { valueAxisName, labelAxisName } = getAxisName(labelOnYAxis, series);
