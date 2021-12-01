@@ -31,7 +31,7 @@ import {
 import { getYAxisOption, isLabelAxisOnYAxis } from '@src/helpers/axes';
 import { AxisTheme, CircularAxisTheme } from '@t/theme';
 
-const chartPadding = { X: 5, Y: 5 };
+const chartPadding = { X: 10, Y: 10 };
 export const padding = { X: 10, Y: 15 };
 const X_AXIS_HEIGHT = 20;
 const Y_AXIS_MIN_WIDTH = 40;
