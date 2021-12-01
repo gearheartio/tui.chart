@@ -149,7 +149,7 @@ export function makeDefaultTheme(series: RawSeries, globalFontFamily = 'Arial') 
   return {
     chart: {
       fontFamily: globalFontFamily,
-      backgroundColor: '#949090',
+      backgroundColor: '#ffffff',
     },
     noData: {
       fontSize: 18,
