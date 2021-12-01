@@ -5,7 +5,8 @@ import { ChartState, Scale, StateFunc, Options, InitStoreState } from '@t/store/
 import { deepMergedCopy } from '@src/helpers/utils';
 import * as Calculator from '@src/helpers/calculator';
 
-const notify = () => {};
+const notify = () => {
+};
 
 const fontTheme = {
   fontSize: 11,
@@ -31,7 +32,13 @@ describe('Axes Store module', () => {
           yAxis: { x: 10, y: 10, width: 10, height: 80 },
           xAxis: { x: 10, y: 10, width: 80, height: 10 },
         },
-        scale: { yAxis: { limit: { min: 0, max: 5 }, stepSize: 1, stepCount: 1 } } as Scale,
+        scale: {
+          yAxis: {
+            limit: { min: 0, max: 5 },
+            stepSize: 1,
+            stepCount: 1,
+          },
+        } as Scale,
         series: { line: { data } },
         axes: {
           xAxis: {},
@@ -57,7 +64,20 @@ describe('Axes Store module', () => {
       axes.action!.setAxesData.call({ notify }, store);
 
       expect(state.axes).toEqual({
+        // eslint-disable-next-line no-undefined
+        centerYAxis: undefined,
+        // eslint-disable-next-line no-undefined
+        secondaryYAxis: undefined,
         xAxis: {
+          extraLabelWidth: 5.5,
+          firstLabelHeight: 11,
+          firstLabelWidth: 11,
+          lastLabelHeight: 11,
+          lastLabelWidth: 11,
+          maxHeight: 21,
+          rotationWidth: 11,
+          // eslint-disable-next-line no-undefined
+          labelRange: undefined,
           isLabelAxis: true,
           labelDistance: 100,
           labelInterval: 3,
@@ -70,13 +90,16 @@ describe('Axes Store module', () => {
           tickInterval: 2,
           maxLabelWidth: 11,
           maxLabelHeight: 11,
-          maxHeight: 26.5,
           offsetY: 15.5,
           needRotateLabel: false,
           radian: 0,
           rotationHeight: 11,
         },
         yAxis: {
+          firstLabelHeight: 11,
+          firstLabelWidth: 11,
+          lastLabelHeight: 11,
+          lastLabelWidth: 11,
           isLabelAxis: false,
           labelInterval: 5,
           labels: ['0', '1', '2', '3', '4', '5'],
@@ -95,7 +118,7 @@ describe('Axes Store module', () => {
       });
     });
 
-    it("should be stored the values, when diverging is enabled and y-axis alignment is 'center' on bar series", () => {
+    it('should be stored the values, when diverging is enabled and y-axis alignment is \'center\' on bar series', () => {
       const data = [
         { name: 'han', data: [1, 2, 3], rawData: [1, 2, 3], color: '#aaaaaa' },
         { name: 'cho', data: [4, 5, 6], rawData: [4, 5, 6], color: '#bbbbbb' },
@@ -150,7 +173,20 @@ describe('Axes Store module', () => {
     axes.action!.setAxesData.call({ notify }, store);
 
     expect(state.axes).toEqual({
+      // eslint-disable-next-line no-undefined
+      centerYAxis: undefined,
+      // eslint-disable-next-line no-undefined
+      secondaryYAxis: undefined,
       xAxis: {
+        extraLabelWidth: 5.5,
+        firstLabelHeight: 11,
+        firstLabelWidth: 11,
+        lastLabelHeight: 11,
+        lastLabelWidth: 11,
+        maxHeight: 21,
+        rotationWidth: 11,
+        // eslint-disable-next-line no-undefined
+        labelRange: undefined,
         isLabelAxis: true,
         labels: ['A', 'B'],
         viewLabels: [
@@ -166,13 +202,16 @@ describe('Axes Store module', () => {
         tickInterval: 1,
         maxLabelWidth: 11,
         maxLabelHeight: 11,
-        maxHeight: 26.5,
         offsetY: 15.5,
         needRotateLabel: false,
         radian: 0,
         rotationHeight: 11,
       },
       yAxis: {
+        firstLabelHeight: 11,
+        firstLabelWidth: 11,
+        lastLabelHeight: 11,
+        lastLabelWidth: 11,
         isLabelAxis: false,
         labels: ['0', '1', '2', '3', '4', '5'],
         viewLabels: [

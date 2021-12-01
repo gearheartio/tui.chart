@@ -12,11 +12,9 @@ import {
   getLabelXMargin,
   getLabelsAppliedFormatter,
   isDateType,
-  getFirstLabelSize,
-  getLastLabelSize,
 } from '@src/helpers/axes';
 import { AxisTheme } from '@t/theme';
-import { getAxisLabelAnchorPoint } from '@src/helpers/calculator';
+import { crispPixel, getAxisLabelAnchorPoint } from '@src/helpers/calculator';
 import { getTitleFontString } from '@src/helpers/style';
 
 type HeatmapStateProp = {
@@ -90,8 +88,8 @@ function getHeatmapAxisData(stateProp: HeatmapStateProp, axisType: AxisType) {
       getRotatableOption(options)
     );
     const { needRotateLabel, rotationHeight } = rotationData;
-    const labelHeight = needRotateLabel ? rotationHeight : maxLabelHeight / 2;
-    const maxHeight = labelHeight + offsetY;
+    const labelHeight = Math.round(needRotateLabel ? rotationHeight : maxLabelHeight / 2);
+    const maxHeight = Math.round(labelHeight + offsetY);
 
     return {
       ...axisData,

@@ -46,6 +46,13 @@ describe('HeatmapAxes Store module state', () => {
 
     expect(state.axes).toEqual({
       xAxis: {
+        // eslint-disable-next-line no-undefined
+        title: undefined,
+        firstLabelHeight: 0,
+        firstLabelWidth: 0,
+        lastLabelHeight: 0,
+        lastLabelWidth: 0,
+        rotationWidth: 11,
         isLabelAxis: true,
         labelDistance: 100,
         labelInterval: 1,
@@ -60,13 +67,19 @@ describe('HeatmapAxes Store module state', () => {
         tickInterval: 1,
         maxLabelWidth: 11,
         maxLabelHeight: 11,
-        maxHeight: 26.5,
+        maxHeight: 22,
         offsetY: 15.5,
         needRotateLabel: false,
         radian: 0,
         rotationHeight: 11,
       },
       yAxis: {
+        // eslint-disable-next-line no-undefined
+        title: undefined,
+        firstLabelHeight: 0,
+        firstLabelWidth: 0,
+        lastLabelHeight: 0,
+        lastLabelWidth: 0,
         isLabelAxis: false,
         labelInterval: 1,
         labelDistance: 50,

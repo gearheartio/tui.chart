@@ -76,15 +76,15 @@ describe('default layout', () => {
 
   const result = {
     chart: { x: 0, y: 0, width: 200, height: 200 },
-    exportMenu: { height: 0, width: 0, x: 190, y: 15 },
-    title: { x: 10, y: 15, width: 0, height: 0 },
-    yAxisTitle: { width: 160, height: 0, x: 10, y: 15 },
-    yAxis: { x: 10, y: 15, width: 40, height: 124 },
-    xAxis: { x: 50, y: 139, width: 120, height: 20 },
-    xAxisTitle: { x: 50, y: 159, width: 0, height: 0 },
+    exportMenu: { height: 0, width: 0, x: 190, y: 10 },
+    title: { x: 10, y: 10, width: 0, height: 0 },
+    yAxisTitle: { width: 160, height: 0, x: 10, y: 10 },
+    yAxis: { x: 10, y: 10, width: 5, height: 160 },
+    xAxis: { x: 15, y: 170, width: 155, height: 20 },
+    xAxisTitle: { x: 15, y: 195, width: 0, height: 0 },
     legend: { x: 180, y: 24, width: 20, height: 104 },
-    circleLegend: { height: 124, width: 0, x: 180, y: 15 },
-    plot: { x: 50, y: 15, width: 120, height: 124 },
+    circleLegend: { height: 160, width: 0, x: 180, y: 10 },
+    plot: { x: 15, y: 10, width: 155, height: 160 },
     resetButton: { height: 0, width: 0, x: 0, y: 0 },
   };
 
@@ -122,9 +122,9 @@ describe('axis size option', () => {
 
     expect(state.layout.yAxis).toEqual({
       x: 10,
-      y: 15,
+      y: 10,
       width: 50,
-      height: 100,
+      height: 160,
     });
   });
 
@@ -153,8 +153,8 @@ describe('axis size option', () => {
     layout.action!.setLayout(store);
 
     expect(state.layout.xAxis).toEqual({
-      x: 50,
-      y: 59,
+      x: 15,
+      y: 90,
       width: 130,
       height: 100,
     });
@@ -191,9 +191,9 @@ describe('axis size option', () => {
     layout.action!.setLayout(store);
 
     const result = {
-      yAxis: { x: 10, y: 15, width: 25, height: 120 },
-      secondaryYAxisTitle: { x: 90, y: 15, width: 80, height: 0 },
-      secondaryYAxis: { x: 150, y: 15, width: 20, height: 120 },
+      yAxis: { x: 10, y: NaN, width: 25, height: 160 },
+      secondaryYAxisTitle: { x: 90, y: 10, width: 80, height: 0 },
+      secondaryYAxis: { x: 150, y: 10, width: 20, height: 160 },
     };
 
     ['yAxis', 'secondaryYAxisTitle', 'secondaryYAxis'].forEach((propName) => {
@@ -229,10 +229,10 @@ describe('only plot size option', () => {
   layout.action!.setLayout(store);
 
   const result = {
-    yAxis: { x: 10, y: 15, width: 40, height: 150 },
-    xAxis: { x: 50, y: 165, width: 120, height: 20 },
-    plot: { x: 50, y: 15, width: 150, height: 150 },
-    secondaryYAxis: { x: 170, y: 15, width: 0, height: 150 },
+    yAxis: { x: 10, y: 10, width: 5, height: 160 },
+    xAxis: { x: 15, y: 170, width: 155, height: 20 },
+    plot: { x: 15, y: 10, width: 150, height: 150 },
+    secondaryYAxis: { x: 170, y: 10, width: 0, height: 160 },
   };
 
   ['yAxis', 'xAxis', 'plot', 'secondaryYAxis'].forEach((prop) => {
@@ -263,8 +263,8 @@ describe('with export menu visible options', () => {
   layout.action!.setLayout(store);
 
   const result = {
-    exportMenu: { height: 29, width: 24, x: 166, y: 15 },
-    title: { x: 10, y: 15, width: 0, height: 29 },
+    exportMenu: { height: 29, width: 24, x: 166, y: 10 },
+    title: { x: 10, y: 10, width: 0, height: 29 },
   };
 
   ['exportMenu', 'title'].forEach((prop) => {
@@ -295,7 +295,7 @@ describe('with reset button visible options', () => {
   layout.action!.setLayout(store);
 
   it(`should set resetButton rect`, () => {
-    expect(state.layout.resetButton).toEqual({ height: 29, width: 24, x: 132, y: 15 });
+    expect(state.layout.resetButton).toEqual({ height: 29, width: 24, x: 132, y: 10 });
   });
 });
 
@@ -320,6 +320,6 @@ describe("subtract half of the xAxis's maximum label length to secure margin siz
   layout.action!.setLayout(store);
 
   it("should set secure margin size for xAxis's width", () => {
-    expect(state.layout.xAxis).toEqual({ height: 20, width: 95, x: 50, y: 35 });
+    expect(state.layout.xAxis).toEqual({ height: 20, width: 155, x: 15, y: 66 });
   });
 });

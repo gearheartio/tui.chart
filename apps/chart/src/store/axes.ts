@@ -37,7 +37,7 @@ import {
   makeRotationData,
   makeTitleOption,
 } from '@src/helpers/axes';
-import { getAxisLabelAnchorPoint, makeLabelsFromLimit } from '@src/helpers/calculator';
+import { crispPixel, getAxisLabelAnchorPoint, makeLabelsFromLimit } from '@src/helpers/calculator';
 import {
   BarTypeYAxisOption,
   BaseAxisOptions,
@@ -341,19 +341,19 @@ function makeXAxisData({ axisData, axisSize, centerYAxis, rotatable, labelMargin
 
   const rotationData = makeRotationData(maxLabelWidth, maxLabelHeight, distance, rotatable);
   const { needRotateLabel, rotationHeight, rotationWidth } = rotationData;
-  const labelHeight = needRotateLabel ? rotationHeight : maxLabelHeight / 2;
+  const labelHeight = crispPixel(needRotateLabel ? rotationHeight : maxLabelHeight / 2);
   const maxHeight = labelHeight + offsetY;
 
-  const extraLabelWidth = needRotateLabel
-    ? (rotationWidth * lastLabelWidth) / maxLabelWidth
-    : lastLabelWidth / 2;
+  const extraLabelWidth = crispPixel(
+    needRotateLabel ? (rotationWidth * lastLabelWidth) / maxLabelWidth : lastLabelWidth / 2
+  );
 
   return {
     ...axisData,
     ...rotationData,
     maxHeight,
     offsetY,
-    extraLabelWidth,
+    extraLabelWidth: pointOnColumn ? 0 : extraLabelWidth,
   };
 }
 

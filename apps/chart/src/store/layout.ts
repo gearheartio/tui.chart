@@ -34,7 +34,6 @@ import { AxisTheme, CircularAxisTheme } from '@t/theme';
 const chartPadding = { X: 10, Y: 10 };
 export const padding = { X: 10, Y: 15 };
 const X_AXIS_HEIGHT = 20;
-const Y_AXIS_MIN_WIDTH = 40;
 
 export function isVerticalAlign(align?: Align) {
   return align === 'top' || align === 'bottom';
@@ -70,6 +69,7 @@ type YAxisRectParam = AxisParam & {
   isRightSide?: boolean;
   visibleSecondaryYAxis?: boolean;
   xAxisTitleHeight: number;
+  xAxisData: AxisData;
 };
 
 type XAxisRectParam = AxisParam & {
@@ -107,8 +107,8 @@ function getValidRectSize(size: OptionalSize, width: number, height: number) {
   };
 }
 
-function getDefaultXAxisHeight(size: OptionSize) {
-  return size.xAxis?.height && !size.yAxis ? size.xAxis.height : X_AXIS_HEIGHT;
+function getDefaultXAxisHeight(size: OptionSize): number {
+  return size.xAxis?.height && !size.yAxis ? size.xAxis.height : 0;
 }
 
 function getDefaultYAxisXPoint(yAxisRectParam: YAxisRectParam) {
@@ -146,6 +146,7 @@ function getYAxisXPoint(yAxisRectParam: YAxisRectParam) {
 
 function getYAxisYPoint({ yAxisTitle, firstLabelHeight, labelOnYAxis }: YAxisRectParam) {
   const extraLabelHeight = labelOnYAxis ? 0 : firstLabelHeight / 2;
+
   return yAxisTitle.y + yAxisTitle.height + extraLabelHeight;
 }
 
@@ -178,15 +179,15 @@ function getYAxisHeight({
   yAxisTitle,
   hasXYAxis,
   size,
-  lastLabelHeight,
   xAxisTitleHeight,
+  xAxisData,
 }: YAxisRectParam) {
   const { height } = chartSize;
   const { align, height: legendHeight } = legend;
-  const xAxisHeight = getDefaultXAxisHeight(size);
+  const xAxisHeight = getDefaultXAxisHeight(size) | getXAxisHeight(xAxisData, hasXYAxis);
 
   const y = yAxisTitle.y + yAxisTitle.height;
-  let yAxisHeight = height - y - xAxisHeight - xAxisTitleHeight + lastLabelHeight / 2;
+  let yAxisHeight = height - y - xAxisHeight - xAxisTitleHeight;
 
   if (!hasXYAxis) {
     yAxisHeight = height - y;
@@ -450,7 +451,11 @@ export function isExportMenuVisible(options: Options) {
 }
 
 function getYAxisMaxLabelWidth(maxLabelLength?: number) {
-  return maxLabelLength ? maxLabelLength + padding.X : Y_AXIS_MIN_WIDTH;
+  if (isUndefined(maxLabelLength) || maxLabelLength === 0) {
+    return TICK_SIZE;
+  }
+
+  return maxLabelLength + chartPadding.X;
 }
 
 function pickOptionSize(option?: BaseSizeOptions): OptionalSize {
@@ -542,14 +547,12 @@ function adjustAxisSize(
     legendHeight -
     height;
 
-  if (diffHeight > 0) {
-    yAxis.height -= diffHeight;
-    xAxis.y -= diffHeight;
-    xAxisTitle.y -= diffHeight;
+  yAxis.height -= diffHeight;
+  xAxis.y -= diffHeight;
+  xAxisTitle.y -= diffHeight;
 
-    if (hasVerticalLegend) {
-      legend.y -= diffHeight;
-    }
+  if (hasVerticalLegend) {
+    legend.y -= diffHeight;
   }
 
   secondaryYAxis.x = xAxis.x + xAxis.width;
@@ -663,6 +666,7 @@ const layout: StoreModule = {
         maxLabelWidth: getYAxisMaxLabelWidth(axes?.yAxis.maxLabelWidth),
         size: optionSize,
         xAxisTitleHeight: xAxisTitleVisible ? xAxisTitleHeight : 0,
+        xAxisData: axes?.xAxis,
       });
 
       const secondaryYAxisTitle = getYAxisTitleRect({
@@ -694,6 +698,7 @@ const layout: StoreModule = {
         isRightSide: true,
         visibleSecondaryYAxis,
         xAxisTitleHeight: xAxisTitleVisible ? xAxisTitleHeight : 0,
+        xAxisData: axes?.xAxis,
       });
 
       const xAxis = getXAxisRect({
