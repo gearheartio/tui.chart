@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Chart 4th Edition
- * @version 4.5.4 | Wed Dec 01 2021
+ * @version 4.5.5 | Wed Dec 01 2021
  * @author NHN. FE Development Lab <dl_javascript@nhn.com>
  * @license MIT
  */
@@ -13065,8 +13065,8 @@ function layout_defineProperty(obj, key, value) { if (key in obj) { Object.defin
 
 
 var chartPadding = {
-  X: 5,
-  Y: 5
+  X: 10,
+  Y: 10
 };
 var padding = {
   X: 10,
