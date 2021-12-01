@@ -24,7 +24,7 @@ module.exports = {
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'accessor-pairs': ['off'],
-    complexity: ['error', { max: 10 }],
+    complexity: ['error', { max: 20 }],
     'consistent-return': ['off'],
     'max-nested-callbacks': ['error', { max: 10 }],
     'default-case': ['off'],

@@ -12,6 +12,8 @@ import {
   getLabelXMargin,
   getLabelsAppliedFormatter,
   isDateType,
+  getFirstLabelSize,
+  getLastLabelSize,
 } from '@src/helpers/axes';
 import { AxisTheme } from '@t/theme';
 import { getAxisLabelAnchorPoint } from '@src/helpers/calculator';
@@ -57,7 +59,7 @@ function getHeatmapAxisData(stateProp: HeatmapStateProp, axisType: AxisType) {
     getTitleFontString(theme.label)
   );
 
-  const axisData = {
+  const axisData: AxisData = {
     labels,
     viewLabels,
     pointOnColumn,
@@ -70,12 +72,17 @@ function getHeatmapAxisData(stateProp: HeatmapStateProp, axisType: AxisType) {
     title: makeTitleOption(options[axisType]?.title),
     maxLabelWidth,
     maxLabelHeight,
+    firstLabelWidth: 0,
+    firstLabelHeight: 0,
+    lastLabelWidth: 0,
+    lastLabelHeight: 0,
   };
 
   if (axisType === AxisType.X) {
     const labelMargin = options.xAxis?.label?.margin ?? 0;
     const offsetY = getAxisLabelAnchorPoint(maxLabelHeight) + labelMargin;
     const distance = axisSize / viewLabels.length;
+
     const rotationData = makeRotationData(
       maxLabelWidth,
       maxLabelHeight,
@@ -83,7 +90,8 @@ function getHeatmapAxisData(stateProp: HeatmapStateProp, axisType: AxisType) {
       getRotatableOption(options)
     );
     const { needRotateLabel, rotationHeight } = rotationData;
-    const maxHeight = (needRotateLabel ? rotationHeight : maxLabelHeight) + offsetY;
+    const labelHeight = needRotateLabel ? rotationHeight : maxLabelHeight / 2;
+    const maxHeight = labelHeight + offsetY;
 
     return {
       ...axisData,

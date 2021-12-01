@@ -225,6 +225,7 @@ type RotationLabelData = {
   needRotateLabel?: boolean;
   radian?: number;
   rotationHeight?: number;
+  rotationWidth?: number;
 };
 
 export type Axes = {
@@ -468,9 +469,15 @@ type BaseAxisData = InitAxisData & {
   tickDistance: number;
   maxLabelWidth: number;
   maxLabelHeight: number;
+  firstLabelWidth: number;
+  firstLabelHeight: number;
+  lastLabelWidth: number;
+  lastLabelHeight: number;
   viewLabels: ViewAxisLabel[];
   offsetY?: number;
   maxHeight?: number;
+  // Additional width if the last label extends beyond the plot right border
+  extraLabelWidth?: number;
 } & RotationLabelData;
 
 export type LabelAxisData = BaseAxisData & {

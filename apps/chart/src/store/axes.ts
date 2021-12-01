@@ -19,9 +19,11 @@ import {
   getAxisFormatter,
   getAxisName,
   getAxisTheme,
+  getFirstLabelSize,
   getInitAxisIntervalData,
   getLabelsAppliedFormatter,
   getLabelXMargin,
+  getLastLabelSize,
   getMaxLabelSize,
   getRotatableOption,
   getSizeKey,
@@ -180,6 +182,8 @@ export function getLabelAxisData(stateProp: ValueStateProp): LabelAxisState {
     isLabelAxis: true,
     ...initialAxisData,
     ...getMaxLabelSize(labels, axisLabelMargin, getTitleFontString(theme.label)),
+    ...getFirstLabelSize(labels, axisLabelMargin, getTitleFontString(theme.label)),
+    ...getLastLabelSize(labels, axisLabelMargin, getTitleFontString(theme.label)),
   };
 }
 
@@ -239,6 +243,8 @@ function getValueAxisData(stateProp: StateProp): ValueAxisState {
     tickDistance,
     ...initialAxisData,
     ...getMaxLabelSize(labels, axisLabelMargin, getTitleFontString(theme.label)),
+    ...getFirstLabelSize(labels, axisLabelMargin, getTitleFontString(theme.label)),
+    ...getLastLabelSize(labels, axisLabelMargin, getTitleFontString(theme.label)),
   };
 
   if (isNumber(zeroPosition)) {
@@ -328,19 +334,26 @@ function getSecondaryYAxisData({
 }
 
 function makeXAxisData({ axisData, axisSize, centerYAxis, rotatable, labelMargin = 0 }): AxisData {
-  const { viewLabels, pointOnColumn, maxLabelWidth, maxLabelHeight } = axisData;
+  const { viewLabels, pointOnColumn, maxLabelWidth, maxLabelHeight, lastLabelWidth } = axisData;
   const offsetY = getAxisLabelAnchorPoint(maxLabelHeight) + labelMargin;
   const size = centerYAxis ? centerYAxis.xAxisHalfSize : axisSize;
   const distance = size / (viewLabels.length - (pointOnColumn ? 0 : 1));
+
   const rotationData = makeRotationData(maxLabelWidth, maxLabelHeight, distance, rotatable);
-  const { needRotateLabel, rotationHeight } = rotationData;
-  const maxHeight = (needRotateLabel ? rotationHeight : maxLabelHeight) + offsetY;
+  const { needRotateLabel, rotationHeight, rotationWidth } = rotationData;
+  const labelHeight = needRotateLabel ? rotationHeight : maxLabelHeight / 2;
+  const maxHeight = labelHeight + offsetY;
+
+  const extraLabelWidth = needRotateLabel
+    ? (rotationWidth * lastLabelWidth) / maxLabelWidth
+    : lastLabelWidth / 2;
 
   return {
     ...axisData,
     ...rotationData,
     maxHeight,
     offsetY,
+    extraLabelWidth,
   };
 }
 

@@ -141,6 +141,7 @@ export function isLabelAxisOnYAxis({
   categories?: Categories;
 }) {
   return (
+    !!series.heatmap ||
     !!series.bar ||
     !!series.radialBar ||
     (!!series.gauge && Array.isArray(categories) && !categories.length) ||
@@ -405,6 +406,7 @@ export function makeRotationData(
       needRotateLabel: false,
       radian: 0,
       rotationHeight: maxLabelHeight,
+      rotationWidth: maxLabelWidth,
     };
   }
 
@@ -412,6 +414,7 @@ export function makeRotationData(
     needRotateLabel: degree > 0,
     radian: calculateDegreeToRadian(degree, 0),
     rotationHeight: calculateRotatedHeight(degree, maxLabelWidth, maxLabelHeight),
+    rotationWidth: calculateRotatedWidth(degree, maxLabelWidth, maxLabelHeight),
   };
 }
 
@@ -421,6 +424,24 @@ export function getMaxLabelSize(labels: string[], xMargin: number, font = DEFAUL
   return {
     maxLabelWidth: getTextWidth(maxLengthLabel, font) + xMargin,
     maxLabelHeight: getTextHeight(maxLengthLabel, font),
+  };
+}
+
+export function getFirstLabelSize(labels: string[], xMargin: number, font = DEFAULT_LABEL_TEXT) {
+  const maxLengthLabel = labels[0] ?? '';
+
+  return {
+    firstLabelWidth: getTextWidth(maxLengthLabel, font) + xMargin,
+    firstLabelHeight: getTextHeight(maxLengthLabel, font),
+  };
+}
+
+export function getLastLabelSize(labels: string[], xMargin: number, font = DEFAULT_LABEL_TEXT) {
+  const maxLengthLabel = labels[labels.length - 1] ?? '';
+
+  return {
+    lastLabelWidth: getTextWidth(maxLengthLabel, font) + xMargin,
+    lastLabelHeight: getTextHeight(maxLengthLabel, font),
   };
 }
 
