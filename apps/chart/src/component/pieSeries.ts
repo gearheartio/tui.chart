@@ -26,13 +26,7 @@ import {
   makePieTooltipData,
   pieTooltipLabelFormatter,
 } from '@src/helpers/pieSeries';
-import {
-  calculateSizeWithPercentString,
-  isNumber,
-  isUndefined,
-  isNull,
-  last,
-} from '@src/helpers/utils';
+import { calculateSizeWithPercentString, isNumber, isUndefined, last } from '@src/helpers/utils';
 import { PieChartSeriesTheme, SelectSectorStyle, PieDataLabelTheme } from '@t/theme';
 import { pick } from '@src/helpers/utils';
 import { RespondersThemeType } from '@src/helpers/responders';

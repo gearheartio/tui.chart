@@ -144,7 +144,7 @@ function getYAxisXPoint(yAxisRectParam: YAxisRectParam) {
   return x;
 }
 
-function getYAxisYPoint({ yAxisTitle, firstLabelHeight, labelOnYAxis }: YAxisRectParam) {
+function getYAxisYPoint({ yAxisTitle, firstLabelHeight = 0, labelOnYAxis }: YAxisRectParam) {
   const extraLabelHeight = labelOnYAxis ? 0 : firstLabelHeight / 2;
 
   return yAxisTitle.y + yAxisTitle.height + extraLabelHeight;
