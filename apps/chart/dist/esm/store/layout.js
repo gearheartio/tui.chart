@@ -47,7 +47,7 @@ function getYAxisXPoint(yAxisRectParam) {
     }
     return x;
 }
-function getYAxisYPoint({ yAxisTitle, firstLabelHeight, labelOnYAxis }) {
+function getYAxisYPoint({ yAxisTitle, firstLabelHeight = 0, labelOnYAxis }) {
     const extraLabelHeight = labelOnYAxis ? 0 : firstLabelHeight / 2;
     return yAxisTitle.y + yAxisTitle.height + extraLabelHeight;
 }

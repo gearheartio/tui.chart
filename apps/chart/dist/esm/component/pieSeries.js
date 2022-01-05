@@ -4,7 +4,7 @@ import { getRadialAnchorPosition, makeAnchorPositionParam, withinRadian, getDefa
 import { getActiveSeriesMap } from "../helpers/legend";
 import { getDataLabelsOptions, RADIUS_PADDING } from "../helpers/dataLabels";
 import { getTotalAngle, isSemiCircle, getSemiCircleCenterY, makePieTooltipData, pieTooltipLabelFormatter, } from "../helpers/pieSeries";
-import { calculateSizeWithPercentString, isNumber, isUndefined, last, } from "../helpers/utils";
+import { calculateSizeWithPercentString, isNumber, isUndefined, last } from "../helpers/utils";
 import { pick } from "../helpers/utils";
 import { message } from "../message";
 import { getMaxLabelSize } from "../helpers/axes";

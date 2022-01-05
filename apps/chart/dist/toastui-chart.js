@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Chart 4th Edition
- * @version 4.5.6 | Wed Dec 01 2021
+ * @version 4.5.7 | Wed Jan 05 2022
  * @author NHN. FE Development Lab <dl_javascript@nhn.com>
  * @license MIT
  */
@@ -13131,7 +13131,8 @@ function getYAxisXPoint(yAxisRectParam) {
 
 function getYAxisYPoint(_ref) {
   var yAxisTitle = _ref.yAxisTitle,
-      firstLabelHeight = _ref.firstLabelHeight,
+      _ref$firstLabelHeight = _ref.firstLabelHeight,
+      firstLabelHeight = _ref$firstLabelHeight === void 0 ? 0 : _ref$firstLabelHeight,
       labelOnYAxis = _ref.labelOnYAxis;
   var extraLabelHeight = labelOnYAxis ? 0 : firstLabelHeight / 2;
   return yAxisTitle.y + yAxisTitle.height + extraLabelHeight;
