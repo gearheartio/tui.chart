@@ -191,7 +191,7 @@ describe('axis size option', () => {
     layout.action!.setLayout(store);
 
     const result = {
-      yAxis: { x: 10, y: NaN, width: 25, height: 160 },
+      yAxis: { x: 10, y: 10, width: 25, height: 160 },
       secondaryYAxisTitle: { x: 90, y: 10, width: 80, height: 0 },
       secondaryYAxis: { x: 150, y: 10, width: 20, height: 160 },
     };
