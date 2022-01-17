@@ -48,7 +48,11 @@ export function getAutoAdjustingInterval(count, axisWidth, categories) {
     divisors(count).forEach((interval) => {
         const intervalWidth = (interval / count) * axisWidth;
         if (intervalWidth >= autoInterval.MIN_WIDTH && intervalWidth <= autoInterval.MAX_WIDTH) {
-            candidates.push({ interval, blockCount: Math.floor(count / interval), remainBlockCount: 0 });
+            candidates.push({
+                interval,
+                blockCount: Math.floor(count / interval),
+                remainBlockCount: 0,
+            });
         }
     });
     if (!candidates.length) {
@@ -162,6 +166,10 @@ export function getAxisTheme(theme, name) {
     }
     return axisTheme;
 }
+/**
+ * This s a tradeoff for recursion in some cases when two rotational states are equally valid.
+ */
+const lastRotDegrees = [null, null];
 function getRotationDegree(distance, labelWidth, labelHeight) {
     let degree = 0;
     ANGLE_CANDIDATES.every((angle) => {
@@ -169,6 +177,18 @@ function getRotationDegree(distance, labelWidth, labelHeight) {
         degree = angle;
         return compareWidth > distance;
     });
+    if (lastRotDegrees[0] === null) {
+        lastRotDegrees[0] = degree;
+    }
+    if (lastRotDegrees[1] === null) {
+        lastRotDegrees[1] = degree;
+    }
+    if (lastRotDegrees.every((deg) => deg !== null)) {
+        if (lastRotDegrees[0] === degree && lastRotDegrees[1] !== degree) {
+            return Math.max(lastRotDegrees[0], lastRotDegrees[1]);
+        }
+        [lastRotDegrees[0], lastRotDegrees[1]] = [lastRotDegrees[1], degree];
+    }
     return distance < labelWidth ? degree : 0;
 }
 function hasYAxisMaxLabelLengthChanged(previousAxes, currentAxes, field) {
@@ -243,6 +263,7 @@ export function getLabelsAppliedFormatter(labels, options, dateType, axisName) {
 }
 export function makeRotationData(maxLabelWidth, maxLabelHeight, distance, rotatable) {
     const degree = getRotationDegree(distance, maxLabelWidth, maxLabelHeight);
+    console.log('degree', degree);
     if (!rotatable || degree === 0) {
         return {
             needRotateLabel: false,

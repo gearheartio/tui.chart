@@ -25,12 +25,12 @@ function calculateOpposite(degree, hypotenuse) {
     return Math.sin(degree * RAD) * hypotenuse;
 }
 export function calculateRotatedWidth(degree, width, height) {
-    const centerHalf = calculateAdjacent(degree, width / 2);
-    const sideHalf = calculateAdjacent(ANGLE_90 - degree, height / 2);
-    return (centerHalf + sideHalf) * 2;
+    const centerHalf = calculateAdjacent(degree, width);
+    const sideHalf = calculateOpposite(degree, height);
+    return centerHalf + sideHalf;
 }
 export function calculateRotatedHeight(degree, width, height) {
-    const centerHalf = calculateOpposite(degree, width / 2);
-    const sideHalf = calculateOpposite(ANGLE_90 - degree, height / 2);
-    return (centerHalf + sideHalf) * 2;
+    const centerHalf = calculateOpposite(degree, width);
+    const sideHalf = calculateAdjacent(degree, height);
+    return centerHalf + sideHalf;
 }

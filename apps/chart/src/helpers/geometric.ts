@@ -28,15 +28,15 @@ function calculateOpposite(degree: number, hypotenuse: number) {
 }
 
 export function calculateRotatedWidth(degree: number, width: number, height: number) {
-  const centerHalf = calculateAdjacent(degree, width / 2);
-  const sideHalf = calculateAdjacent(ANGLE_90 - degree, height / 2);
+  const centerHalf = calculateAdjacent(degree, width);
+  const sideHalf = calculateOpposite(degree, height);
 
-  return (centerHalf + sideHalf) * 2;
+  return centerHalf + sideHalf;
 }
 
 export function calculateRotatedHeight(degree: number, width: number, height: number) {
-  const centerHalf = calculateOpposite(degree, width / 2);
-  const sideHalf = calculateOpposite(ANGLE_90 - degree, height / 2);
+  const centerHalf = calculateOpposite(degree, width);
+  const sideHalf = calculateAdjacent(degree, height);
 
-  return (centerHalf + sideHalf) * 2;
+  return centerHalf + sideHalf;
 }

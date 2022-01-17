@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Chart 4th Edition
- * @version 4.5.8 | Mon Jan 17 2022
+ * @version 4.5.9 | Mon Jan 17 2022
  * @author NHN. FE Development Lab <dl_javascript@nhn.com>
  * @license MIT
  */
@@ -10175,14 +10175,14 @@ function calculateOpposite(degree, hypotenuse) {
 }
 
 function calculateRotatedWidth(degree, width, height) {
-  var centerHalf = calculateAdjacent(degree, width / 2);
-  var sideHalf = calculateAdjacent(ANGLE_90 - degree, height / 2);
-  return (centerHalf + sideHalf) * 2;
+  var centerHalf = calculateAdjacent(degree, width);
+  var sideHalf = calculateOpposite(degree, height);
+  return centerHalf + sideHalf;
 }
 function calculateRotatedHeight(degree, width, height) {
-  var centerHalf = calculateOpposite(degree, width / 2);
-  var sideHalf = calculateOpposite(ANGLE_90 - degree, height / 2);
-  return (centerHalf + sideHalf) * 2;
+  var centerHalf = calculateOpposite(degree, width);
+  var sideHalf = calculateAdjacent(degree, height);
+  return centerHalf + sideHalf;
 }
 ;// CONCATENATED MODULE: ./src/helpers/formatDate.ts
 
@@ -10970,6 +10970,11 @@ function getAxisTheme(theme, name) {
 
   return axisTheme;
 }
+/**
+ * This s a tradeoff for recursion in some cases when two rotational states are equally valid.
+ */
+
+var lastRotDegrees = [null, null];
 
 function getRotationDegree(distance, labelWidth, labelHeight) {
   var degree = 0;
@@ -10978,6 +10983,27 @@ function getRotationDegree(distance, labelWidth, labelHeight) {
     degree = angle;
     return compareWidth > distance;
   });
+
+  if (lastRotDegrees[0] === null) {
+    lastRotDegrees[0] = degree;
+  }
+
+  if (lastRotDegrees[1] === null) {
+    lastRotDegrees[1] = degree;
+  }
+
+  if (lastRotDegrees.every(function (deg) {
+    return deg !== null;
+  })) {
+    if (lastRotDegrees[0] === degree && lastRotDegrees[1] !== degree) {
+      return Math.max(lastRotDegrees[0], lastRotDegrees[1]);
+    }
+
+    var _ref2 = [lastRotDegrees[1], degree];
+    lastRotDegrees[0] = _ref2[0];
+    lastRotDegrees[1] = _ref2[1];
+  }
+
   return distance < labelWidth ? degree : 0;
 }
 
@@ -11088,6 +11114,7 @@ function getLabelsAppliedFormatter(labels, options, dateType, axisName) {
 }
 function makeRotationData(maxLabelWidth, maxLabelHeight, distance, rotatable) {
   var degree = getRotationDegree(distance, maxLabelWidth, maxLabelHeight);
+  console.log('degree', degree);
 
   if (!rotatable || degree === 0) {
     return {
