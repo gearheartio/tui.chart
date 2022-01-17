@@ -1,6 +1,7 @@
 const RAD = Math.PI / 180;
 const ANGLE_90 = 90;
-export const ANGLE_CANDIDATES = [0, 25, 45, 65, 85, 90];
+// From 0 to 90 degrees inclusive.
+export const ANGLE_CANDIDATES = Array.from(new Array(91), (v, i) => i);
 /**
  * Calculate adjacent.
  *

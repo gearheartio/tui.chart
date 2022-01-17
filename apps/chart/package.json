@@ -1,6 +1,6 @@
 {
   "name": "@tui-gearheart/chart",
-  "version": "4.5.7",
+  "version": "4.5.8",
   "description": "TOAST UI Application: Chart",
   "main": "dist/toastui-chart.js",
   "types": "types/index.d.ts",

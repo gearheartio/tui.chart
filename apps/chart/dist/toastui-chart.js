@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Chart 4th Edition
- * @version 4.5.7 | Wed Jan 05 2022
+ * @version 4.5.8 | Mon Jan 17 2022
  * @author NHN. FE Development Lab <dl_javascript@nhn.com>
  * @license MIT
  */
@@ -10141,9 +10141,14 @@ var Axis = /*#__PURE__*/function (_Component) {
 
 
 ;// CONCATENATED MODULE: ./src/helpers/geometric.ts
+
+
 var RAD = Math.PI / 180;
-var ANGLE_90 = 90;
-var ANGLE_CANDIDATES = [0, 25, 45, 65, 85, 90];
+var ANGLE_90 = 90; // From 0 to 90 degrees inclusive.
+
+var ANGLE_CANDIDATES = Array.from(new Array(91), function (v, i) {
+  return i;
+});
 /**
  * Calculate adjacent.
  *
