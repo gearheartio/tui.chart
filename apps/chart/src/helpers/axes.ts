@@ -424,7 +424,6 @@ export function makeRotationData(
   rotatable: boolean
 ): Required<RotationLabelData> {
   const degree = getRotationDegree(distance, maxLabelWidth, maxLabelHeight);
-  console.log('degree', degree);
   if (!rotatable || degree === 0) {
     return {
       needRotateLabel: false,

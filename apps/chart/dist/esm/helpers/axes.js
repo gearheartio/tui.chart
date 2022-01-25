@@ -263,7 +263,6 @@ export function getLabelsAppliedFormatter(labels, options, dateType, axisName) {
 }
 export function makeRotationData(maxLabelWidth, maxLabelHeight, distance, rotatable) {
     const degree = getRotationDegree(distance, maxLabelWidth, maxLabelHeight);
-    console.log('degree', degree);
     if (!rotatable || degree === 0) {
         return {
             needRotateLabel: false,
