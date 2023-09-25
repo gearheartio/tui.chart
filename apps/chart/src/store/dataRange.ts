@@ -18,7 +18,7 @@ import {
 } from '@src/helpers/axes';
 import { getCoordinateYValue, isCoordinateSeries } from '@src/helpers/coordinate';
 import { isRangeValue } from '@src/helpers/range';
-import { CoordinateDataType } from '@t/options';
+import { CoordinateDataType, PlotLine } from '@t/options';
 import { AxisType } from '@src/component/axis';
 
 type SeriesDataRange = {
@@ -147,6 +147,17 @@ function getBulletValues(series: Series, seriesName: string) {
   ]);
 }
 
+function getOptionValues(options): number[] {
+  const { plot } = options;
+  if (plot) {
+    const lines = (plot.lines || []) as PlotLine[];
+
+    return lines.map(({ value }) => (typeof value === 'number' ? value : parseFloat(value)));
+  }
+
+  return [];
+}
+
 function getCoordinateDataValues(
   values: CoordinateDataType[],
   categories: string[],
@@ -215,6 +226,12 @@ const dataRange: StoreModule = {
 
         if (includes(['bar', 'column', 'radar', 'bullet'], seriesName)) {
           values.push(0);
+        }
+
+        const optionValues = getOptionValues(options);
+
+        if (optionValues) {
+          values.push(...optionValues);
         }
 
         setSeriesDataRange({
