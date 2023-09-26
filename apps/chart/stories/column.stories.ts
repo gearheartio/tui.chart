@@ -377,3 +377,50 @@ export const positiveAndNegativeWithPlotLines = () => {
 
   return el;
 };
+
+export const benchmarkBoundaries = () => {
+  const { el } = createChart(
+    {
+      categories: [''],
+      series: [
+        {
+          name: 'Number (sum)',
+          data: [120],
+          visible: true,
+        },
+      ],
+    },
+    {
+      series: {
+        dataLabels: { visible: false },
+        selectable: false,
+        stack: false,
+      },
+      legend: { align: 'right', visible: false },
+      plot: {
+        lines: [
+          {
+            name: 'target',
+            value: 400,
+            color: '#0C41F3',
+            orientation: 'horizontal',
+            width: 2,
+            dashSegments: [8, 3],
+          },
+        ],
+      },
+      exportMenu: { visible: false },
+      usageStatistics: false,
+      chart: { width: 830, height: 390 },
+      theme: {
+        series: { colors: ['#0C41F3'], dataLabels: { fontSize: 8 } },
+        xAxis: { color: '#E9E9E9', label: { color: '#878B92' } },
+        yAxis: { color: '#E9E9E9', label: { color: '#878B92' } },
+      },
+      responsive: { animation: { duration: 300 } },
+      tooltip: {},
+    }
+  );
+
+  return el;
+};

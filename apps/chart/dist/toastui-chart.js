@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Chart 4th Edition
- * @version 4.5.10 | Tue Jan 25 2022
+ * @version 4.5.11 | Mon Sep 25 2023
  * @author NHN. FE Development Lab <dl_javascript@nhn.com>
  * @license MIT
  */
@@ -18196,6 +18196,20 @@ function getBulletValues(series, seriesName) {
   });
 }
 
+function getOptionValues(options) {
+  var plot = options.plot;
+
+  if (plot) {
+    var lines = plot.lines || [];
+    return lines.map(function (_ref4) {
+      var value = _ref4.value;
+      return typeof value === 'number' ? value : parseFloat(value);
+    });
+  }
+
+  return [];
+}
+
 function getCoordinateDataValues(values, categories, hasDateValue) {
   var yAxisValues = values.filter(function (value) {
     return !isNull(value);
@@ -18219,9 +18233,9 @@ var dataRange = {
     };
   },
   action: {
-    setDataRange: function setDataRange(_ref4) {
-      var state = _ref4.state,
-          initStoreState = _ref4.initStoreState;
+    setDataRange: function setDataRange(_ref5) {
+      var state = _ref5.state,
+          initStoreState = _ref5.initStoreState;
       var series = state.series,
           disabledSeries = state.disabledSeries,
           stackSeries = state.stackSeries,
@@ -18242,9 +18256,9 @@ var dataRange = {
         var _stackSeries$seriesNa;
 
         seriesDataRange[seriesName] = {};
-        var values = series[seriesName].data.flatMap(function (_ref5) {
-          var data = _ref5.data,
-              name = _ref5.name;
+        var values = series[seriesName].data.flatMap(function (_ref6) {
+          var data = _ref6.data,
+              name = _ref6.name;
           return disabledSeries.includes(name) ? [] : data;
         });
         var firstExistValue = getFirstValidValue(values);
@@ -18280,6 +18294,14 @@ var dataRange = {
 
         if (includes(['bar', 'column', 'radar', 'bullet'], seriesName)) {
           values.push(0);
+        }
+
+        var optionValues = getOptionValues(options);
+
+        if (optionValues) {
+          var _values;
+
+          (_values = values).push.apply(_values, dataRange_toConsumableArray(optionValues));
         }
 
         setSeriesDataRange({

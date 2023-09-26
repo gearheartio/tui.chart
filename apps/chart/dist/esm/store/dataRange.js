@@ -97,6 +97,14 @@ function getBulletValues(series, seriesName) {
         ...((ranges !== null && ranges !== void 0 ? ranges : [])).flatMap((range) => range),
     ]);
 }
+function getOptionValues(options) {
+    const { plot } = options;
+    if (plot) {
+        const lines = (plot.lines || []);
+        return lines.map(({ value }) => (typeof value === 'number' ? value : parseFloat(value)));
+    }
+    return [];
+}
 function getCoordinateDataValues(values, categories, hasDateValue) {
     const yAxisValues = values
         .filter((value) => !isNull(value))
@@ -148,6 +156,10 @@ const dataRange = {
                 }
                 if (includes(['bar', 'column', 'radar', 'bullet'], seriesName)) {
                     values.push(0);
+                }
+                const optionValues = getOptionValues(options);
+                if (optionValues) {
+                    values.push(...optionValues);
                 }
                 setSeriesDataRange({
                     options,

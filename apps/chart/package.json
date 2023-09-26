@@ -1,6 +1,6 @@
 {
   "name": "@tui-gearheart/chart",
-  "version": "4.5.10",
+  "version": "4.5.11",
   "description": "TOAST UI Application: Chart",
   "main": "dist/toastui-chart.js",
   "types": "types/index.d.ts",
@@ -100,5 +100,7 @@
     "dist",
     "types"
   ],
-  "devDependencies": {}
+  "devDependencies": {
+    "webpack-cli": "^5.1.4"
+  }
 }
